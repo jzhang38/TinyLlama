@@ -144,6 +144,6 @@ TinyLlama是一个相对较小的模型, 同时我们用了GQA, 这意味着它�
   title     = {TinyLlama},
   url       = {https://github.com/jzhang38/TinyLlama},
   year      = {2023},
-  month     = {Oct},
+  month     = {Sep},
 }
 ```
