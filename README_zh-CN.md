@@ -41,7 +41,7 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 从上面可以看出，TinyLlama目前的进展非常好🎉🎉。
 
 
-你也可以在[这里](https://wandb.ai/lance777/lightning_logs/reports/metric-train_loss-23-09-02-15-26-17---Vmlldzo1MjkzNzMw?accessToken=9843chbl7rfi1w03hxttpcnbo9z8t6088pw3ddn4h8teunaq0cy7j8hw9c5i02ve)实时跟踪TinyLlama的训练损失。
+你也可以在[这里](https://api.wandb.ai/links/lance777/pgvhrsny)实时跟踪TinyLlama的训练损失。
 
 ## 潜在场景
 小型但强大的语言模型对许多应用都很有用。以下是一些潜在的场景：
