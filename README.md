@@ -94,10 +94,10 @@ Below is a comparison of the training speed of our codebase with that of Pythia 
 
 The fact that TinyLlama is a relatively small model with grouped query attention means it is also fast during inference. Below are some throughputs that we measure:
 
-| Framework | Device | Batch Size | Throughput |
+| Framework | Device | Batch Size | Throughput (tokens/sec) |
 |-----------|--------------|-----|-----------|
-|[Llama.cpp](https://github.com/ggerganov/llama.cpp) | Mac M2 16GB RAM         |  1|    71.8 tokens/sec      | 
-|[vLLM](https://github.com/vllm-project/vllm)       | One A40 GPU  |  |           |
+|[Llama.cpp](https://github.com/ggerganov/llama.cpp) | Mac M2 16GB RAM         |  batch_size=1; 4-bit inference|    71.8     | 
+|[vLLM](https://github.com/vllm-project/vllm)       | A40 GPU  | batch_size=100, n=10 |   7094.5         |
 
 
 ## Getting Started
