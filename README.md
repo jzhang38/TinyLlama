@@ -141,7 +141,7 @@ If you find our work valuable, please cite:
   title     = {TinyLlama},
   url       = {https://github.com/jzhang38/TinyLlama},
   year      = {2023},
-  month     = {Oct},
+  month     = {Sep},
 }
 ```
 
