@@ -34,6 +34,7 @@ TinyLlama项目旨在在30万亿tokens上进行预训练，构建一个拥有11�
 | 2023-12-01 | --                                             | 3T     | --   |  --               |
 
 <!-- | Baseline   | [Pythia-1B-intermediate-52b](https://huggingface.co/EleutherAI/pythia-1b/tree/step25000)             | 52B   | 25k   |  38.81            | -->
+
 <!-- | Baseline   | [Pythia-1.4B-intermediate-52b](https://huggingface.co/EleutherAI/pythia-1.4b/tree/step25000)             | 52B   | 25k   |  42.49            | -->
 <!-- | Baseline   | [Pythia-1.4B-intermediate-105b](https://huggingface.co/EleutherAI/pythia-1.4b/tree/step50000)             | 105B   | 50k   |  46.14            | -->
 
@@ -116,6 +117,10 @@ TinyLlama是一个相对较小的模型, 同时我们用了GQA, 这意味着它�
  - [ ] A demo running on mobile phones. 
  - [ ] Explore retrieval-augmentation.
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=jzhang38/TinyLlama&type=Date)](https://star-history.com/#jzhang38/TinyLlama&Date)
+
 
 ## Acknowledgements
 这个仓库基于出色的开源项目[lit-gpt](https://github.com/Lightning-AI/lit-gpt)和[flash-attention](https://github.com/Dao-AILab/flash-attention)构建. 
@@ -147,3 +152,4 @@ TinyLlama是一个相对较小的模型, 同时我们用了GQA, 这意味着它�
   month     = {Sep},
 }
 ```
+
