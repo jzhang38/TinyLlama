@@ -45,7 +45,7 @@ Tiny but strong language models are useful for many applications. Here are some 
 - Deployment on edge devices with restricted memory and computational capacities, for functionalities like real-time machine translation without an internet connection (the 4bit-quantized TinyLlama-1.1B's weight only takes up 550MB RAM).
 - Enabling real-time dialogue generation in video games.
 
-Moreover, our code can be a valuable **reference for enthusiasts keen on pretraining language models under 5 billion parameters** without diving too early into [Megatron-LM](https://github.com/NVIDIA/Megatron-LM).
+Moreover, our code can be a **reference for enthusiasts keen on pretraining language models under 5 billion parameters** without diving too early into [Megatron-LM](https://github.com/NVIDIA/Megatron-LM).
 
 ## Training Details
 Below are some details of our training setup:
