@@ -61,8 +61,8 @@ Below are some details of our training setup:
 | Learning Rate Schedule          | Cosine with 2000 warmup steps                                  |
 | Training Data                   | [Slimpajama](https://huggingface.co/datasets/cerebras/slimpajama-627b) & [Starcoderdata](https://huggingface.co/datasets/bigcode/starcoderdata) |
 | Data Preprocessing              | Excluded GitHub subset of Slimpajama; Sampled all code from Starcoderdata |
-| Combined Dataset Size           | 1 trillion tokens                                              |
-| Total Tokens During Training    | 3 trillion (3 epochs/1430k steps)                                          |
+| Combined Dataset Size           | around 950B tokens                                              |
+| Total Tokens During Training    | 3 trillion (slightly more than 3 epochs/1430k steps)                                          |
 | Natural Language to Code Ratio  | 7:3                                                            |
 | Hardware                        | 16 A100-40G GPUs                                               |
 
@@ -107,6 +107,7 @@ Please refer to [PRETRAIN.md](PRETRAIN.md) for instructions on how to pretrain T
 This project is still under active development. We are a really small team. Community feedback and contributions are highly appreciated. Here are some things we plan to work on:
  - [ ] Add scripts for pretraining on other datasets.
  - [ ] Sequence length extrapolation.
+ - [ ] Test out speculative decoding for Llama-2-7B.
  - [ ] Test the throughput on RTX 3090/4090. 
  - [ ] Add fine-tuning scripts.
  - [ ] Properly evaluate the model on downstream tasks.
