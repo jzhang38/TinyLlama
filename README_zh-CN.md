@@ -97,10 +97,10 @@ TinyLlama项目旨在在30万亿tokens上进行预训练，构建一个拥有11�
 
 TinyLlama是一个相对较小的模型, 同时我们用了GQA, 这意味着它在推理期间也很快。以下是我们测量的一些推理速度：
 
-| Framework | Device | Batch Size | Throughput |
+| Framework | Device | Batch Size | Throughput (tokens/sec) |
 |-----------|--------------|-----|-----------|
-|[Llama.cpp](https://github.com/ggerganov/llama.cpp) | Mac M2 16GB RAM         |  1|    71.8 tokens/sec      | 
-|[vLLM](https://github.com/vllm-project/vllm)       | One A40 GPU  |  |           |
+|[Llama.cpp](https://github.com/ggerganov/llama.cpp) | Mac M2 16GB RAM         |  batch_size=1; 4-bit inference|    71.8     | 
+|[vLLM](https://github.com/vllm-project/vllm)       | A40 GPU  | batch_size=100, n=10 |   7094.5         |
 
 
 ## 开始训练
