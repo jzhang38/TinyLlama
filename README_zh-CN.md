@@ -65,8 +65,8 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 | Learning Rate Schedule          | Cosine with 2000 warmup steps                                  |
 | Training Data                   | [Slimpajama](https://huggingface.co/datasets/cerebras/slimpajama-627b) & [Starcoderdata](https://huggingface.co/datasets/bigcode/starcoderdata) |
 | Data Preprocessing              | Excluded GitHub subset of Slimpajama; Sampled all code from Starcoderdata |
-| Combined Dataset Size           | 1 trillion tokens                                              |
-| Total Tokens During Training    | 3 trillion (3 epochs/143k steps)                                          |
+| Combined Dataset Size           | 950B tokens                                              |
+| Total Tokens During Training    | 3 trillion (slightly more than 3 epochs/143k steps)                                          |
 | Natural Language to Code Ratio  | 7:3                                                            |
 | Hardware                        | 16 A100-40G GPUs                                               |
 
@@ -111,6 +111,7 @@ TinyLlama是一个相对较小的模型, 同时我们用了GQA, 这意味着它�
 该项目仍在积极开发中。我们团队很小，非常欢迎社区的反馈和贡献。以下是我们计划进行的一些工作：
  - [ ] Add scripts for pretraining on other datasets.
  - [ ] Sequence length extrapolation.
+ - [ ] Test out speculative decoding for Llama-2-7B.
  - [ ] Test the throughput on RTX 3090/4090. 
  - [ ] Add fine-tuning scripts.
  - [ ] Properly evaluate the model on downstream tasks.
