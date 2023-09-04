@@ -37,7 +37,7 @@ We will be rolling out intermediate checkpoints following the below schedule. We
 
 It can be observed that TinyLlama has so far progressed well 🎉🎉. 
 
-Meanwhile, you can track the live cross entropy loss [here](https://wandb.ai/lance777/lightning_logs/reports/metric-train_loss-23-09-02-15-26-17---Vmlldzo1MjkzNzMw?accessToken=9843chbl7rfi1w03hxttpcnbo9z8t6088pw3ddn4h8teunaq0cy7j8hw9c5i02ve).
+Meanwhile, you can track the live cross entropy loss [here]([https://wandb.ai/lance777/lightning_logs/reports/metric-train_loss-23-09-02-15-26-17---Vmlldzo1MjkzNzMw?accessToken=9843chbl7rfi1w03hxttpcnbo9z8t6088pw3ddn4h8teunaq0cy7j8hw9c5i02ve](https://wandb.ai/lance777/lightning_logs/reports/metric-train_loss-23-09-04-23-38-15---Vmlldzo1MzA4MzIw?accessToken=5eu2sndit2mo6eqls8h38sklcgfwt660ek1f2czlgtqjv2c6tida47qm1oty8ik9).
 
 ## Potential Usecase
 Tiny but strong language models are useful for many applications. Here are some potential usecases:
