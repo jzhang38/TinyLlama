@@ -157,3 +157,9 @@ Above is the training loss curve taken from the Llama 2 paper. Here I quote from
 <img src=".github/Pythia_saturation.png" alt="Figure 10 of the Pythia paper" width="500"/>
 
 The figure from the Pythia paper displays the LAMBADA accuracy plotted against the total training tokens (300B). The term "saturation" pertains specifically to the 70M and 160M models. Notably, even the 410M model does not saturate with 300B tokens, as it continues to show an increasing trend, similar to the trend of larger models. 
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=jzhang38/TinyLlama&type=Date)](https://star-history.com/#jzhang38/TinyLlama&Date)
+
