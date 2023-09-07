@@ -20,18 +20,18 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 
 
 
-| Date       | HF Checkpoint                                   | Tokens | Step | HellaSwag Acc_norm |
-|------------|-------------------------------------------------|--------|------|---------------------|
-| Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            |
-| Baseline   | [Pythia-1B-intermediate-step-50k-105b](https://huggingface.co/EleutherAI/pythia-1b/tree/step50000)             | 105B   | 50k   |  42.04            |
-| Baseline   | [Pythia-1B](https://huggingface.co/EleutherAI/pythia-1b)             | 300B   | 143k   |  47.16            |
-| 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   |  43.50               |
-| 2023-09-16 | --                                             | 500B   | --   |  --               |
-| 2023-10-01 | --                                             | 1T     | --   |  --               |
-| 2023-10-16 | --                                             | 1.5T   | --   |  --               |
-| 2023-10-31 | --                                             | 2T     | --   |  --               |
-| 2023-11-15 | --                                             | 2.5T   | --   |  --               |
-| 2023-12-01 | --                                             | 3T     | --   |  --               |
+| Date       | HF Checkpoint                                   | Tokens | Step | HellaSwag Acc_norm | MMLU Avg | DROP EM Score | HumanEval Pass@1 | BBH EM Score |
+|------------|-------------------------------------------------|--------|------|--------------------|----------|---------------|------------------|--------------|
+| Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            | -- | -- | -- | -- |
+| Baseline   | [Pythia-1B-intermediate-step-50k-105b](https://huggingface.co/EleutherAI/pythia-1b/tree/step50000)             | 105B   | 50k   |  42.04            | -- | -- | -- | -- |
+| Baseline   | [Pythia-1B](https://huggingface.co/EleutherAI/pythia-1b)             | 300B   | 143k   |  47.16            | 25.92 | 9.67 | 4.27 | 28.42 |
+| 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   |  43.50               | 26.49 | 10.56 | 5.49 | 29.21 |
+| 2023-09-16 | --                                             | 500B   | --   |  --               | -- | -- | -- | -- |
+| 2023-10-01 | --                                             | 1T     | --   |  --               | -- | -- | -- | -- |
+| 2023-10-16 | --                                             | 1.5T   | --   |  --               | -- | -- | -- | -- |
+| 2023-10-31 | --                                             | 2T     | --   |  --               | -- | -- | -- | -- |
+| 2023-11-15 | --                                             | 2.5T   | --   |  --               | -- | -- | -- | -- |
+| 2023-12-01 | --                                             | 3T     | --   |  --               | -- | -- | -- | -- |
 
 <!-- | Baseline   | [Pythia-1B-intermediate-52b](https://huggingface.co/EleutherAI/pythia-1b/tree/step25000)             | 52B   | 25k   |  38.81            | -->
 
