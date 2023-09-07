@@ -18,7 +18,7 @@ We will be rolling out intermediate checkpoints following the below schedule. We
 
 | Date       | HF Checkpoint                                   | Tokens | Step | HellaSwag| MMLU | BBH | HumanEval| DROP| 
 |------------|-------------------------------------------------|--------|------|--------|---| --- | --- | --- |
-| --         | --                                              | ----   | --   |  acc_norm   | acc | exact match | pass @ 1 | exact match |
+| --         | --                                              | ----   | --   |  acc_norm   | acc | EM | pass @ 1 | EM |
 | Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            | -- | -- | -- | -- |
 | Baseline   | [Pythia-1B-intermediate-step-50k-105b](https://huggingface.co/EleutherAI/pythia-1b/tree/step50000)             | 105B   | 50k   |  42.04            | -- | -- | -- | -- |
 | Baseline   | [Pythia-1B](https://huggingface.co/EleutherAI/pythia-1b)             | 300B   | 143k   |  47.16            |26.22 | 28.33| 4.27| 9.72| 
