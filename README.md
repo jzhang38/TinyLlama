@@ -16,12 +16,13 @@ We adopted exactly the same architecture and tokenizer as Llama 2. This means Ti
 #### Releases Schedule
 We will be rolling out intermediate checkpoints following the below schedule. We also include some baseline models for comparison.
 
-| Date       | HF Checkpoint                                   | Tokens | Step | HellaSwag Acc_norm |
-|------------|-------------------------------------------------|--------|------|---------------------|
-| Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            |
-| Baseline   | [Pythia-1B-intermediate-step-50k-105b](https://huggingface.co/EleutherAI/pythia-1b/tree/step50000)             | 105B   | 50k   |  42.04            |
-| Baseline   | [Pythia-1B](https://huggingface.co/EleutherAI/pythia-1b)             | 300B   | 143k   |  47.16            |
-| 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   |  43.50               |
+| Date       | HF Checkpoint                                   | Tokens | Step | HellaSwag| MMLU | BBH | HumanEval| DROP| 
+|------------|-------------------------------------------------|--------|------|--------|---| --- | --- | --- |
+| --         | --                                              | ----   | --   |  acc_norm   | acc | exact match | pass @ 1 | exact match |
+| Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            | -- | -- | -- | -- |
+| Baseline   | [Pythia-1B-intermediate-step-50k-105b](https://huggingface.co/EleutherAI/pythia-1b/tree/step50000)             | 105B   | 50k   |  42.04            | -- | -- | -- | -- |
+| Baseline   | [Pythia-1B](https://huggingface.co/EleutherAI/pythia-1b)             | 300B   | 143k   |  47.16            |26.22 | 28.33| 4.27| 9.72| 
+| 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   |  43.50               | 26.45 | 28.82 |  5.49 | 11.42|
 | 2023-09-16 | --                                             | 500B   | --   |  --               |
 | 2023-10-01 | --                                             | 1T     | --   |  --               |
 | 2023-10-16 | --                                             | 1.5T   | --   |  --               |
@@ -34,6 +35,8 @@ We will be rolling out intermediate checkpoints following the below schedule. We
 <!-- | Baseline   | [Pythia-1.4B-intermediate-105b](https://huggingface.co/EleutherAI/pythia-1.4b/tree/step50000)             | 105B   | 50k   |  46.14            | -->
 <!-- | 2023-09-04 | [TinyLlama-1.1B-intermediate-52b](https://huggingface.co/PY007/TinyLlama-1.1B-52b)   | 52B    | 25k  |  40.85            |
 | 2023-09-04 | [TinyLlama-1.1B-intermediate-84b](https://huggingface.co/PY007/TinyLlama-1.1B-84b)   | 84B    | 40k  |  42.65            |  -->
+
+Scores are returned by [instruct-eval](https://github.com/declare-lab/instruct-eval), except for HellaSwag, for which we use [lm-eval-harness](https://github.com/EleutherAI/lm-evaluation-harness).
 
 It can be observed that TinyLlama has so far progressed well 🎉🎉. 
 

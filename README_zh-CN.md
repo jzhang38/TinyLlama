@@ -20,12 +20,13 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 
 
 
-| Date       | HF Checkpoint                                   | Tokens | Step | HellaSwag Acc_norm |
-|------------|-------------------------------------------------|--------|------|---------------------|
-| Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            |
-| Baseline   | [Pythia-1B-intermediate-step-50k-105b](https://huggingface.co/EleutherAI/pythia-1b/tree/step50000)             | 105B   | 50k   |  42.04            |
-| Baseline   | [Pythia-1B](https://huggingface.co/EleutherAI/pythia-1b)             | 300B   | 143k   |  47.16            |
-| 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   |  43.50               |
+| Date       | HF Checkpoint                                   | Tokens | Step | HellaSwag| MMLU | BBH | HumanEval| DROP| 
+|------------|-------------------------------------------------|--------|------|--------|---| --- | --- | --- |
+| --         | --                                              | ----   | --   |  acc_norm   | acc | exact match | pass @ 1 | exact match |
+| Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            | -- | -- | -- | -- |
+| Baseline   | [Pythia-1B-intermediate-step-50k-105b](https://huggingface.co/EleutherAI/pythia-1b/tree/step50000)             | 105B   | 50k   |  42.04            | -- | -- | -- | -- |
+| Baseline   | [Pythia-1B](https://huggingface.co/EleutherAI/pythia-1b)             | 300B   | 143k   |  47.16            |26.22 | 28.33| 4.27| 9.72| 
+| 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   |  43.50               | 26.45 | 28.82 |  5.49 | 11.42|
 | 2023-09-16 | --                                             | 500B   | --   |  --               |
 | 2023-10-01 | --                                             | 1T     | --   |  --               |
 | 2023-10-16 | --                                             | 1.5T   | --   |  --               |
@@ -38,7 +39,9 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 <!-- | Baseline   | [Pythia-1.4B-intermediate-52b](https://huggingface.co/EleutherAI/pythia-1.4b/tree/step25000)             | 52B   | 25k   |  42.49            | -->
 <!-- | Baseline   | [Pythia-1.4B-intermediate-105b](https://huggingface.co/EleutherAI/pythia-1.4b/tree/step50000)             | 105B   | 50k   |  46.14            | -->
 
-从上面可以看出，TinyLlama目前的进展非常好🎉🎉。
+我们使用[lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness) 来产生HellaSwag的分数，其他benchmark的分数来自于[instruct-eval](https://github.com/declare-lab/instruct-eval).
+
+从上面可以看出，TinyLlama目前的进展很好🎉🎉。
 
 
 你也可以在[这里](https://api.wandb.ai/links/lance777/pgvhrsny)实时跟踪TinyLlama的训练损失。
