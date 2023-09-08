@@ -23,7 +23,7 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 | Date       | HF Checkpoint                                   | Tokens | Step | HellaSwag| MMLU | BBH | HumanEval| DROP| 
 |------------|-------------------------------------------------|--------|------|--------|---| --- | --- | --- |
 | --         | --                                              | ----   | --   |  acc_norm   | acc | EM | pass @ 1 | EM |
-| Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            | -- | -- | -- | -- |
+| Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            | 25.70 | 28.19 | 1.83 | 4.25 |
 | Baseline   | [Pythia-1B-intermediate-step-50k-105b](https://huggingface.co/EleutherAI/pythia-1b/tree/step50000)             | 105B   | 50k   |  42.04            | -- | -- | -- | -- |
 | Baseline   | [Pythia-1B](https://huggingface.co/EleutherAI/pythia-1b)             | 300B   | 143k   |  47.16            |26.22 | 28.33| 4.27| 9.72| 
 | 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   |  43.50               | 26.45 | 28.82 |  5.49 | 11.42|
