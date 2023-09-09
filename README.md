@@ -12,6 +12,8 @@ The TinyLlama project aims to **pretrain** a **1.1B Llama model on 3 trillion to
 
 We adopted exactly the same architecture and tokenizer as Llama 2. This means TinyLlama can be plugged and played in many open-source projects built upon Llama. Besides, TinyLlama is compact with only 1.1B parameters. This compactness allows it to cater to a multitude of applications demanding a restricted computation and memory footprint.
 
+Launch a WebUI here - https://colab.research.google.com/drive/17oF4DXWRwU9zz_JhZ3DL62R8-fj2N3ka?usp=sharing
+
 
 #### Releases Schedule
 We will be rolling out intermediate checkpoints following the below schedule. We also include some baseline models for comparison.
