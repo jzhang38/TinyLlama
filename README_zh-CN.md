@@ -88,7 +88,7 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 - fused rotary positional embedding.
 
 Credit: flash attention 2, fused layernorm, fused cross entropy loss, and fused
-rotary positional embedding are from the [FlashAttention repo](https://github.com/Dao-AILab/flash-attention/).
+rotary positional embedding are from the [FlashAttention repo](https://github.com/Dao-AILab/flash-attention/). Fused swiglu is from [xformers](https://github.com/facebookresearch/xformers).
 
 有了这些优化, 我们可以达到**24k tokens/秒/A100**的训练速度，也就是56%的MFU（在A100-80G上的MFU会更高）。这个速度可以让你可以在**8个A100上用32小时训练一个chinchilla-optimial的模型**(11亿参数，220亿token)。这些优化也大大减少了显存占用, 我们可以把11亿参数的模型塞入40GB的GPU里面还能同时维持16k tokens的per-gpu batch size。只需要把batch size改小一点， 你就可以在**RTX 3090/4090**上面训练TinyLlama。
 下面是我们的代码库与Pythia和MPT的训练速度的比较。
