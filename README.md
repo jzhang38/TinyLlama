@@ -83,6 +83,9 @@ Our codebase supports the following features:
 - fused cross entropy loss .
 - fused rotary positional embedding.
 
+Credit: flash attention 2, fused layernorm, fused cross entropy loss, and fused
+rotary positional embedding are from the [FlashAttention repo](https://github.com/Dao-AILab/flash-attention/).
+
 Thanks to those optimizations, we achieve a throughput of **24k** tokens per second per A100-40G GPU, which translates to **56% model flops utilization** without activation checkpointing (We expect the MFU to be even higher on A100-80G). It means you can train a chinchilla-optimal TinyLlama (1.1B param, 22B tokens) in **32 hours with 8 A100**. Those optimizations also greatly reduce the memory footprint, allowing us to stuff our 1.1B model into 40GB GPU RAM and train with a per-gpu batch size of 16k tokens. **You can also pretrain TinyLlama on 3090/4090 GPUs with a smaller per-gpu batch size**.
 Below is a comparison of the training speed of our codebase with that of Pythia and MPT.
 
