@@ -2,6 +2,8 @@
 
 # TinyLlama-1.1B
 English | [中文](README_zh-CN.md)
+
+[Chat Demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat-Demo)
 </div>
 
 The TinyLlama project aims to **pretrain** a **1.1B Llama model on 3 trillion tokens**. With some proper optimization, we can achieve this within a span of "just" 90 days using 16 A100-40G GPUs 🚀🚀. The training has started on 2023-09-01. 
@@ -12,33 +14,28 @@ The TinyLlama project aims to **pretrain** a **1.1B Llama model on 3 trillion to
 
 We adopted exactly the same architecture and tokenizer as Llama 2. This means TinyLlama can be plugged and played in many open-source projects built upon Llama. Besides, TinyLlama is compact with only 1.1B parameters. This compactness allows it to cater to a multitude of applications demanding a restricted computation and memory footprint.
 
+#### News
+- 2023-09-16: 1. We released the intermediate checkpoint trained on 503B tokens. 2. We released a chat model finetuned on OpenAssisant and simple finetuning scripts is added [finetune](finetune). 3. We added a [chat demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat-Demo) so that you can play with TinyLlama-Chat-V0.1 right away. 4. More eval benchmarks are added and documented in [EVAL.md](EVAL.md). 
+
+#### Evaluation
+You can find the evaluation results of TinyLlama in [EVAL.md](EVAL.md).
 
 #### Releases Schedule
-We will be rolling out intermediate checkpoints following the below schedule. We also include some baseline models for comparison.
+We will be rolling out intermediate checkpoints following the below schedule. 
 
-| Date       | HF Checkpoint                                   | Tokens | Step | HellaSwag| MMLU | BBH | HumanEval| DROP| 
-|------------|-------------------------------------------------|--------|------|--------|---| --- | --- | --- |
-| --         | --                                              | ----   | --   |  acc_norm   | acc | EM | pass @ 1 | EM |
-| Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            | 25.70 | 28.19 | 1.83 | 4.25 |
-| Baseline   | [Pythia-1B-intermediate-step-50k-105b](https://huggingface.co/EleutherAI/pythia-1b/tree/step50000)             | 105B   | 50k   |  42.04            | -- | -- | -- | -- |
-| Baseline   | [Pythia-1B](https://huggingface.co/EleutherAI/pythia-1b)             | 300B   | 143k   |  47.16            |26.22 | 28.33| 4.27| 9.72| 
-| 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   |  43.50               | 26.45 | 28.82 |  5.49 | 11.42|
-| 2023-09-16 | --                                             | 500B   | --   |  --               |
-| 2023-10-01 | --                                             | 1T     | --   |  --               |
-| 2023-10-16 | --                                             | 1.5T   | --   |  --               |
-| 2023-10-31 | --                                             | 2T     | --   |  --               |
-| 2023-11-15 | --                                             | 2.5T   | --   |  --               |
-| 2023-12-01 | --                                             | 3T     | --   |  --               |
+| Date       | HF Checkpoint                                   | Tokens | Step | Commonsense Avg |
+|------------|-------------------------------------------------|--------|------| --------------- |
+| 2023-09-01 | Pythia-1.0B                                     | 300B   | 143k   | 48.30 |
+| 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   | 46.11|
+| 2023-09-16 | [TinyLlama-1.1B-intermediate-step-240k-503b](https://huggingface.co/PY007/TinyLlama-1.1B-step-240K-503b)                                            | 503B   | 240K    | 48.28 |
+| 2023-09-16 | [TinyLlama-1.1B-Chat-V0.1](https://huggingface.co/PY007/TinyLlama-1.1B-step-240K-503b)                                            | 503B   | 240K    | 
+| 2023-10-01 | --                                             | 1T     | --    | -- |
+| 2023-10-16 | --                                             | 1.5T   | --    |-- |
+| 2023-10-31 | --                                             | 2T     | --    |-- |
+| 2023-11-15 | --                                             | 2.5T   | --    |-- |
+| 2023-12-01 | --                                             | 3T     | --    |-- |
 
-<!-- | Baseline   | [Pythia-1B-intermediate-52b](https://huggingface.co/EleutherAI/pythia-1b/tree/step25000)             | 52B   | 25k   |  38.81            | -->
-<!-- | Baseline   | [Pythia-1.4B-intermediate-52b](https://huggingface.co/EleutherAI/pythia-1.4b/tree/step25000)             | 52B   | 25k   |  42.49            | -->
-<!-- | Baseline   | [Pythia-1.4B-intermediate-105b](https://huggingface.co/EleutherAI/pythia-1.4b/tree/step50000)             | 105B   | 50k   |  46.14            | -->
-<!-- | 2023-09-04 | [TinyLlama-1.1B-intermediate-52b](https://huggingface.co/PY007/TinyLlama-1.1B-52b)   | 52B    | 25k  |  40.85            |
-| 2023-09-04 | [TinyLlama-1.1B-intermediate-84b](https://huggingface.co/PY007/TinyLlama-1.1B-84b)   | 84B    | 40k  |  42.65            |  -->
-
-Scores are returned by [instruct-eval](https://github.com/declare-lab/instruct-eval), except for HellaSwag, for which we use [lm-eval-harness](https://github.com/EleutherAI/lm-evaluation-harness).
-
-It can be observed that TinyLlama has so far progressed well 🎉🎉. 
+Note that the learning rate of the base model has not cooled down yet so we recommend you to also use the finetuned chat model.
 
 Meanwhile, you can track the live cross entropy loss [here](https://wandb.ai/lance777/lightning_logs/reports/metric-train_loss-23-09-04-23-38-15---Vmlldzo1MzA4MzIw?accessToken=5eu2sndit2mo6eqls8h38sklcgfwt660ek1f2czlgtqjv2c6tida47qm1oty8ik9).
 
@@ -61,7 +58,7 @@ Below are some details of our training setup:
 | Sequence Length                 | 2048                                                           |
 | Batch Size                      | 2 million tokens (2048 * 1024)                                             |
 | Learning Rate                   | 4e-4                                                           |
-| Learning Rate Schedule          | Cosine with 2000 warmup steps                                  |
+| Learning Rate Schedule          | Cosine with 2000 warmup steps. See [Issue 27](https://github.com/jzhang38/TinyLlama/issues/27) for a minor bug     |
 | Training Data                   | [Slimpajama](https://huggingface.co/datasets/cerebras/slimpajama-627b) & [Starcoderdata](https://huggingface.co/datasets/bigcode/starcoderdata) |
 | Data Preprocessing              | Excluded GitHub subset of Slimpajama; Sampled all code from Starcoderdata |
 | Combined Dataset Size           | Around 950B tokens                                              |
@@ -106,8 +103,13 @@ The fact that TinyLlama is a relatively small model with grouped query attention
 |[vLLM](https://github.com/vllm-project/vllm)       | A40 GPU  | batch_size=100, n=10 |   7094.5         |
 
 
-## Getting Started
+## Pretrain
 Please refer to [PRETRAIN.md](PRETRAIN.md) for instructions on how to pretrain TinyLlama.
+
+## Finetune
+We include a simple full-parameter finetuning & inference script in [sft](sft). Our V0.1 chat model is finetuned using this script. The FT dataset we use is [openassistant-guanaco](https://huggingface.co/datasets/timdettmers/openassistant-guanaco). 
+For finetune with less than 4GB RAM, we refer you to the [Qlora](https://github.com/artidoro/qlora) and [bitsandbytes](https://github.com/TimDettmers/bitsandbytes) repo.
+We did not undergone extensive hyperparameter tuning nor choosing more performant FT datasets. We hope the community can explore on finetuning TinyLlama and come up with better chat models. I will include community-finetuned models in this repo.
 
 ## TODO
 This project is still under active development. We are a really small team. Community feedback and contributions are highly appreciated. Here are some things we plan to work on:
@@ -119,6 +121,7 @@ This project is still under active development. We are a really small team. Comm
  - [ ] Properly evaluate the model on downstream tasks.
  - [ ] A demo running on mobile phones. 
  - [ ] Explore retrieval-augmentation.
+
 
 
 ## Acknowledgements
