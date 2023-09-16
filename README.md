@@ -28,7 +28,7 @@ We will be rolling out intermediate checkpoints following the below schedule.
 | 2023-09-01 | Pythia-1.0B                                     | 300B   | 143k   | 48.30 |
 | 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   | 46.11|
 | 2023-09-16 | [TinyLlama-1.1B-intermediate-step-240k-503b](https://huggingface.co/PY007/TinyLlama-1.1B-step-240K-503b)                                            | 503B   | 240K    | 48.28 |
-| 2023-09-16 | [TinyLlama-1.1B-Chat-V0.1](https://huggingface.co/PY007/TinyLlama-1.1B-step-240K-503b)                                            | 503B   | 240K    | 
+| 2023-09-16 | [TinyLlama-1.1B-Chat-V0.1](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)                                            | 503B   | 240K    |  49.57 |
 | 2023-10-01 | --                                             | 1T     | --    | -- |
 | 2023-10-16 | --                                             | 1.5T   | --    |-- |
 | 2023-10-31 | --                                             | 2T     | --    |-- |
