@@ -1,3 +1,7 @@
+# We include a simple full-parameter finetuning & inference script here. Our V0.1 chat model is finetuned using this script. 
+# The FT dataset we use is openassistant-guanaco. For finetuning with less than 4GB RAM, we refer you to the Qlora and bitsandbytes repo.
+# We did not undergone extensive hyperparameter tuning nor choosing more performant FT datasets. 
+# We hope the community can explore on finetuning TinyLlama and come up with better chat models. I will include community-finetuned models in this repo.
 CUDA_VISIBLE_DEVICES=4,5,6,7 accelerate launch --multi_gpu --num_processes 4 --main_process_port 1234 finetune.py \
     --model_name_or_path PY007/TinyLlama-1.1B-intermediate-step-240k-503b \
     --output_dir ./output/503B_FT_lr1e-5_ep5 \
