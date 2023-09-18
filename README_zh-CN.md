@@ -44,7 +44,7 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 
 
 
-需要注意的是，由于我们的现在模型还处于训练初期，学习率并没有完全稳定下来，为了更好的体验我们的模型，您可以下载我们 [聊天模型](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1) 或者 [chat demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat) 通过来尝试我们的模型。
+需要注意的是，由于我们的现在模型还处于训练初期，学习率并没有完全稳定下来，为了更好的体验我们的模型，您可以下载我们 [聊天模型](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1) 或者通过 [chat demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat) 来尝试我们的模型。
 
 
 你们也可以在[这里](https://api.wandb.ai/links/lance777/pgvhrsny)实时跟踪TinyLlama的训练损失。
@@ -120,11 +120,9 @@ TinyLlama是一个相对较小的模型, 同时我们用了GQA, 这意味着它�
 
 ## Finetune
 
-* 我们在 [sft](sft) 中添加了我们进行微调和推理的代码。并且我们也用了这个代码在[openassistant-guanaco](https://huggingface.co/datasets/timdettmers/openassistant-guanaco) 上进行了微调，得到了我们的第一版[聊天模型](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)。
-
-* 如果您希望用我们的模型在 RAM 小于 4GB 的 GPU 上进行微调，可以参考并使用 [Qlora](https://github.com/artidoro/qlora) 和 [bitsandbytes](https://github.com/TimDettmers/bitsandbytes) 项目。
-* 目前微调的时候我们并没有广泛对超参进行搜索，也没有选择潜在更优的 instruction 数据集。
-* 最后我们希望进一步促进NLP社区对于我们的TinyLlama模型的开放研究，并开源更好的微调聊天模型。我们也会把这些模型放在这个项目中。
+* 我们在 [sft](sft) 中添加了我们进行微调和推理的代码。并且基于这个代码我们在[openassistant-guanaco](https://huggingface.co/datasets/timdettmers/openassistant-guanaco) 数据集上进行了微调，得到了我们的第一版[聊天模型](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)。
+* 如果您希望在 RAM 小于 4GB 的 GPU 上对用我们的模型进行微调，可以参考并使用 [Qlora](https://github.com/artidoro/qlora) 和 [bitsandbytes](https://github.com/TimDettmers/bitsandbytes) 项目。
+* 目前微调的时候我们并没有广泛对超参进行搜索，也没有选择潜在更优的 instruction 数据集。我们希望促进 NLP 社区对于我们的TinyLlama模型的开放研究，并开源更好的微调聊天模型。我们也会把这些模型放在这个项目中。
 
 
 
