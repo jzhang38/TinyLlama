@@ -2,6 +2,8 @@
 
 # TinyLlama-1.1B
 [English](README.md) | 中文
+
+[Chat Demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat)
 </div>
 
 TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11亿参数的Llama模型。经过精心优化，我们"仅"需16块A100-40G的GPU，便可在90天内完成这个任务🚀🚀。训练已于2023-09-01开始。
@@ -10,41 +12,42 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 <div align="center">
   <img src=".github/TinyLlama_logo.png" width="300"/>
 </div>
-
 我们采用了与Llama 2完全相同的架构和分词器。这意味着TinyLlama可以在许多基于Llama的开源项目中即插即用。此外，TinyLlama只有1.1B的参数，体积小巧，适用于需要限制计算和内存占用的多种应用。
+
+#### 新闻
+
+* 2023-09-18: 
+  * 发布了一个 [chat demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat)，欢迎点击链接来尝试我们的模型。
+* 2023-09-16: 
+  * 发布了目前已经训练了 5.03 亿个 token 的 [checkpoints 模型](https://huggingface.co/PY007/TinyLlama-1.1B-intermediate-step-240k-503b)。 
+  * 基于 5.03 亿 token 的 [checkpoints 模型](https://huggingface.co/PY007/TinyLlama-1.1B-intermediate-step-240k-503b) 在 OpenAssistant 数据集上微调并开源了聊天模型 [TinyLlama-Chat-V0.1](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1) ，并添加了我们的 [微调脚本](sft) 。
+  * 添加了更多的评测数据集，您可以通过 [EVAL.md](EVAL.md) 文件来查看我们各模型的结果。
+
+
 
 
 #### 发布时间表
 
 我们会根据以下计划逐步发布中间checkpoint。我们也列了一些基线模型进行比较。
 
+| Date       | HF Checkpoint                                                | Tokens | Step | Commonsense Avg |
+| ---------- | ------------------------------------------------------------ | ------ | ---- | --------------- |
+| 2023-09-01 | Pythia-1.0B                                                  | 300B   | 143k | 48.30           |
+| 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k  | 46.11           |
+| 2023-09-16 | [TinyLlama-1.1B-intermediate-step-240k-503b](https://huggingface.co/PY007/TinyLlama-1.1B-intermediate-step-240k-503b) | 503B   | 240K | 48.28           |
+| 2023-09-16 | [TinyLlama-1.1B-Chat-V0.1](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1) | 503B   | 240K | 49.57           |
+| 2023-10-01 | --                                                           | 1T     | --   | --              |
+| 2023-10-16 | --                                                           | 1.5T   | --   | --              |
+| 2023-10-31 | --                                                           | 2T     | --   | --              |
+| 2023-11-15 | --                                                           | 2.5T   | --   | --              |
+| 2023-12-01 | --                                                           | 3T     | --   | --              |
 
 
-| Date       | HF Checkpoint                                   | Tokens | Step | HellaSwag| MMLU | BBH | HumanEval| DROP| 
-|------------|-------------------------------------------------|--------|------|--------|---| --- | --- | --- |
-| --         | --                                              | ----   | --   |  acc_norm   | acc | EM | pass @ 1 | EM |
-| Baseline   | [StableLM-Alpha-3B](https://huggingface.co/stabilityai/stablelm-base-alpha-3b)| 800B   | --   |  38.31            | 25.70 | 28.19 | 1.83 | 4.25 |
-| Baseline   | [Pythia-1B-intermediate-step-50k-105b](https://huggingface.co/EleutherAI/pythia-1b/tree/step50000)             | 105B   | 50k   |  42.04            | -- | -- | -- | -- |
-| Baseline   | [Pythia-1B](https://huggingface.co/EleutherAI/pythia-1b)             | 300B   | 143k   |  47.16            |26.22 | 28.33| 4.27| 9.72| 
-| 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   |  43.50               | 26.45 | 28.82 |  5.49 | 11.42|
-| 2023-09-16 | --                                             | 500B   | --   |  --               |
-| 2023-10-01 | --                                             | 1T     | --   |  --               |
-| 2023-10-16 | --                                             | 1.5T   | --   |  --               |
-| 2023-10-31 | --                                             | 2T     | --   |  --               |
-| 2023-11-15 | --                                             | 2.5T   | --   |  --               |
-| 2023-12-01 | --                                             | 3T     | --   |  --               |
 
-<!-- | Baseline   | [Pythia-1B-intermediate-52b](https://huggingface.co/EleutherAI/pythia-1b/tree/step25000)             | 52B   | 25k   |  38.81            | -->
-
-<!-- | Baseline   | [Pythia-1.4B-intermediate-52b](https://huggingface.co/EleutherAI/pythia-1.4b/tree/step25000)             | 52B   | 25k   |  42.49            | -->
-<!-- | Baseline   | [Pythia-1.4B-intermediate-105b](https://huggingface.co/EleutherAI/pythia-1.4b/tree/step50000)             | 105B   | 50k   |  46.14            | -->
-
-我们使用[lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness) 来产生HellaSwag的分数，其他benchmark的分数来自于[instruct-eval](https://github.com/declare-lab/instruct-eval).
-
-从上面可以看出，TinyLlama目前的进展很好🎉🎉。
+需要注意的是，由于我们的现在模型还处于训练初期，学习率并没有完全稳定下来，为了更好的体验我们的模型，您可以下载我们 [聊天模型](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1) 或者 [chat demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat) 通过来尝试我们的模型。
 
 
-你也可以在[这里](https://api.wandb.ai/links/lance777/pgvhrsny)实时跟踪TinyLlama的训练损失。
+你们也可以在[这里](https://api.wandb.ai/links/lance777/pgvhrsny)实时跟踪TinyLlama的训练损失。
 
 ## 潜在场景
 小型但强大的语言模型对许多应用都很有用。以下是一些潜在的场景：
@@ -112,6 +115,18 @@ TinyLlama是一个相对较小的模型, 同时我们用了GQA, 这意味着它�
 
 ## 开始训练
 请参考[PRETRAIN.md](PRETRAIN.md)。
+
+
+
+## Finetune
+
+* 我们在 [sft](sft) 中添加了我们进行微调和推理的代码。并且我们也用了这个代码在[openassistant-guanaco](https://huggingface.co/datasets/timdettmers/openassistant-guanaco) 上进行了微调，得到了我们的第一版[聊天模型](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)。
+
+* 如果您希望用我们的模型在 RAM 小于 4GB 的 GPU 上进行微调，可以参考并使用 [Qlora](https://github.com/artidoro/qlora) 和 [bitsandbytes](https://github.com/TimDettmers/bitsandbytes) 项目。
+* 目前微调的时候我们并没有广泛对超参进行搜索，也没有选择潜在更优的 instruction 数据集。
+* 最后我们希望进一步促进NLP社区对于我们的TinyLlama模型的开放研究，并开源更好的微调聊天模型。我们也会把这些模型放在这个项目中。
+
+
 
 ## TODO
 该项目仍在积极开发中。我们团队很小，非常欢迎社区的反馈和贡献。以下是我们计划进行的一些工作：
