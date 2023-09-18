@@ -196,10 +196,14 @@ def get_accelerate_model(args, checkpoint_dir):
         trust_remote_code=args.trust_remote_code,
     )
     if tokenizer._pad_token is None:
+        non_special_tokens = []
+        if args.dataset == "OpenAssistant/oasst_top1_2023-08-25":
+            non_special_tokens = ["<|im_start|>", "<|im_end|>",]
         smart_tokenizer_and_embedding_resize(
             special_tokens_dict=dict(pad_token=DEFAULT_PAD_TOKEN),
             tokenizer=tokenizer,
             model=model,
+            non_special_tokens=non_special_tokens,
         )
         
 
@@ -228,12 +232,13 @@ def smart_tokenizer_and_embedding_resize(
     special_tokens_dict: Dict,
     tokenizer: transformers.PreTrainedTokenizer,
     model: transformers.PreTrainedModel,
+    non_special_tokens = None,
 ):
     """Resize tokenizer and embedding.
 
     Note: This is the unoptimized version that may make your embedding size not be divisible by 64.
     """
-    num_new_tokens = tokenizer.add_special_tokens(special_tokens_dict)
+    num_new_tokens = tokenizer.add_special_tokens(special_tokens_dict) + tokenizer.add_tokens(non_special_tokens)
     model.resize_token_embeddings(len(tokenizer))
     
     if num_new_tokens > 0:
@@ -245,6 +250,7 @@ def smart_tokenizer_and_embedding_resize(
 
         input_embeddings_data[-num_new_tokens:] = input_embeddings_avg
         output_embeddings_data[-num_new_tokens:] = output_embeddings_avg
+    print(f"Resized tokenizer and embedding to {len(tokenizer)} tokens.")
 
 @dataclass
 class DataCollatorForCausalLM(object):
@@ -380,14 +386,14 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
             return load_dataset("yahma/alpaca-cleaned")
         elif dataset_name == 'chip2':
             return load_dataset("laion/OIG", data_files='unified_chip2.jsonl')
-        elif dataset_name == 'self-instruct':
-            return load_dataset("yizhongw/self_instruct", name='self_instruct')
         elif dataset_name == 'hh-rlhf':
             return load_dataset("Anthropic/hh-rlhf")
         elif dataset_name == 'longform':
             return load_dataset("akoksal/LongForm")
         elif dataset_name == 'oasst1':
             return load_dataset("timdettmers/openassistant-guanaco")
+        elif dataset_name == "OpenAssistant/oasst_top1_2023-08-25":
+            return load_dataset("OpenAssistant/oasst_top1_2023-08-25")
         elif dataset_name == 'vicuna':
             raise NotImplementedError("Vicuna data was not released.")
         else:

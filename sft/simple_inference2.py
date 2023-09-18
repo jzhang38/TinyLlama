@@ -3,7 +3,7 @@
 from transformers import AutoTokenizer
 import transformers 
 import torch
-model = "PY007/TinyLlama-1.1B-Chat-v0.1"
+model = "PY007/TinyLlama-1.1B-Chat-v0.2"
 tokenizer = AutoTokenizer.from_pretrained(model)
 pipeline = transformers.pipeline(
     "text-generation",
@@ -14,7 +14,7 @@ pipeline = transformers.pipeline(
 
 prompt = "How to get in a good university?"
 formatted_prompt = (
-    f"### Human: {prompt} ### Assistant:"
+    f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
 )
 
 

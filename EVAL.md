@@ -10,7 +10,7 @@ We evaluate TinyLlama's commonsense reasoning ability fowlling the GPT4All[https
 | TinyLlama-1.1B-intermediate-step-50K-104b |        103B     | 43.50     | 29.80| 53.28      | 24.32 | 44.91 | 59.66 | 67.30 | 46.11|
 | TinyLlama-1.1B-intermediate-step-240k-503b|        503B     | 49.56     |31.40 |55.80       |26.54  |48.32  |56.91  |69.42  | 48.28 |
 | TinyLlama-1.1B-Chat-v0.1                  |        503B     | 53.81     |32.20 |55.01       |28.67  |49.62  |58.04  |69.64  | 49.57 |
-
+| TinyLlama-1.1B-Chat-v0.2                  |        503B     | 53.63     |32.80 | 54.85      |28.75  |49.16  | 55.72 |69.48  | 49.20 |
 We observed huge improvements once we finetuned the model. We attribute this phenomenon to: 1. the base model has not undergone lr cool-down and FT helps to cool down the lr. 2. the SFT stage better elicit the model's internal knowledge.
 
 You can obtain above scores by running [lm-eval-harness](https://github.com/EleutherAI/lm-evaluation-harness):
