@@ -12,7 +12,7 @@ pipeline = transformers.pipeline(
     device_map="auto",
 )
 
-prompt = "How to get in a good university?"
+prompt = "Give me detailed info about Jeo Biden."
 formatted_prompt = (
     f"### Human: {prompt} ### Assistant:"
 )
