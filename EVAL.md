@@ -2,7 +2,7 @@
 
 ### GPT4All Benchmarks
 
-We evaluate TinyLlama's commonsense reasoning ability fowlling the GPT4All[https://gpt4all.io/index.html] evaluation suite. We include Pythia as our baselines. We report the acc_norm by default. 
+We evaluate TinyLlama's commonsense reasoning ability following the [GPT4All](https://gpt4all.io/index.html) evaluation suite. We include Pythia as our baseline. We report the acc_norm by default. 
 
 | Model                                     | Pretrain Tokens | HellaSwag | Obqa | WinoGrande | ARC_c | ARC_e | boolq | piqa | avg |
 |-------------------------------------------|-----------------|-----------|------|------------|-------|-------|-------|------|-----|
@@ -12,9 +12,9 @@ We evaluate TinyLlama's commonsense reasoning ability fowlling the GPT4All[https
 | TinyLlama-1.1B-Chat-v0.1                  |        503B     | 53.81     |32.20 |55.01       |28.67  |49.62  |58.04  |69.64  | 49.57 |
 <!-- | TinyLlama-1.1B-Chat-v0.2                  |        503B     | 53.63     |32.80 | 54.85      |28.75  |49.16  | 55.72 |69.48  | 49.20 | -->
 
-We observed huge improvements once we finetuned the model. We attribute this phenomenon to: 1. the base model has not undergone lr cool-down and FT helps to cool down the lr. 2. the SFT stage better elicit the model's internal knowledge.
+We observed huge improvements once we finetuned the model. We attribute this phenomenon to: 1. the base model has not undergone lr cool-down and FT helps to cool down the lr. 2. the SFT stage better elicits the model's internal knowledge.
 
-You can obtain above scores by running [lm-eval-harness](https://github.com/EleutherAI/lm-evaluation-harness):
+You can obtain the above scores by running [lm-eval-harness](https://github.com/EleutherAI/lm-evaluation-harness):
 ```bash
 python main.py \
     --model hf-causal \
@@ -26,7 +26,7 @@ python main.py \
 
 
 ### Instruct-Eval Benchmarks
-We evaluate TinyLlama's ability in problem-solving on the Instruct-Eval[https://github.com/declare-lab/instruct-eval] evaluation suite. 
+We evaluate TinyLlama's ability in problem-solving on the [Instruct-Eval](https://github.com/declare-lab/instruct-eval) evaluation suite. 
 
 
 | Model                                     | MMLU | BBH  | HumanEval | DROP |
