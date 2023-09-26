@@ -51,7 +51,7 @@ class Tokenizer:
         self,
         string: str,
         device: Optional[torch.device] = None,
-        bos: bool = False,
+        bos: bool = True,
         eos: bool = False,
         max_length: int = -1,
     ) -> torch.Tensor:
