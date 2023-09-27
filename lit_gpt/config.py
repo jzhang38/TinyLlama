@@ -22,6 +22,7 @@ class Config:
     rotary_percentage: float = 0.25
     parallel_residual: bool = True
     bias: bool = True
+    shift: Optional[int] = 1
     # to use multi-head attention (MHA), set this to `n_head` (default)
     # to use multi-query attention (MQA), set this to 1
     # to use grouped-query attention (GQA), set this to a value in between
@@ -280,6 +281,25 @@ tiny_LLaMA = [
         _mlp_class="LLaMAMLP",
         intermediate_size=2048,
         n_query_groups=1,
+    ),
+    dict(
+        org="StatNLP-research",
+        name="tiny_LLaMA_1b_shift7",
+        block_size=2048,
+        vocab_size=32000,
+        padding_multiple=64,
+        n_layer=22,
+        n_head=32,
+        n_embd=2048,
+        rotary_percentage=1.0,
+        parallel_residual=False,
+        bias=False,
+        _norm_class="RMSNorm",
+        norm_eps=1e-5, #Llama 2 use 1e-5. Llama 1 use 1e-6
+        _mlp_class="LLaMAMLP",
+        intermediate_size=5632,
+        n_query_groups=4,
+        shift = 4,
     ),
 ]
 configs.extend(tiny_LLaMA)

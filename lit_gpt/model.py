@@ -89,6 +89,7 @@ class GPT(nn.Module):
 
         cos, sin = self.rope_cache
         if use_kv_cache:
+
             cos = cos.index_select(0, input_pos)
             sin = sin.index_select(0, input_pos)
             mask = self.mask_cache.index_select(2, input_pos)
@@ -100,12 +101,12 @@ class GPT(nn.Module):
 
         # forward the model itself
         x = self.transformer.wte(idx)  # token embeddings of shape (b, t, n_embd)
-
+            
         if not use_kv_cache:
             for block in self.transformer.h:
                 x, *_ = block(x, (cos, sin), max_seq_length)
         else:
-            self.kv_caches = self.kv_caches or self.build_kv_caches(x, max_seq_length, cos.size(-1))
+            self.kv_caches = self.kv_caches or self.build_kv_caches(x, max_seq_length, cos.size(-1) * 2)
             for i, block in enumerate(self.transformer.h):
                 x, self.kv_caches[i] = block(x, (cos, sin), max_seq_length, mask, input_pos, self.kv_caches[i])
 
@@ -132,14 +133,15 @@ class GPT(nn.Module):
 
     def build_kv_caches(self, idx: torch.Tensor, max_seq_length: int, rope_cache_length: int) -> List[KVCache]:
         B = idx.size(0)
-        heads = 1 if self.config.n_query_groups == 1 else self.config.n_head
+        heads = 1 if self.config.n_query_groups == 1 else self.config.n_query_groups
+
         k_cache_shape = (
             B,
-            heads,
             max_seq_length,
+            heads,
             rope_cache_length + self.config.head_size - int(self.config.rotary_percentage * self.config.head_size),
         )
-        v_cache_shape = (B, heads, max_seq_length, self.config.head_size)
+        v_cache_shape = (B, max_seq_length, heads, self.config.head_size)
         device = idx.device
         return [
             (torch.zeros(k_cache_shape, device=device), torch.zeros(v_cache_shape, device=device))
@@ -165,7 +167,12 @@ class Block(nn.Module):
         input_pos: Optional[torch.Tensor] = None,
         kv_cache: Optional[KVCache] = None,
     ) -> Tuple[torch.Tensor, Optional[KVCache]]:
-        n_1 = self.norm_1(x)
+        if self.config.shift != 1:
+            # flow information within local window
+            mix = (x + x.view(x.shape[0], x.shape[1] // self.config.shift, self.config.shift, -1).mean(dim=2).repeat_interleave(self.config.shift, dim=1))/2
+        else: 
+            mix = x
+        n_1 = self.norm_1(mix)
         h, new_kv_cache = self.attn(n_1, rope, max_seq_length, mask, input_pos, kv_cache)
         if self.config.parallel_residual:
             n_2 = n_1 if self.config.shared_attention_norm else self.norm_2(x)
@@ -248,10 +255,11 @@ class CausalSelfAttention(nn.Module):
             if input_pos[-1] >= max_seq_length:
                 input_pos = torch.tensor(max_seq_length - 1, device=input_pos.device)
                 # shift 1 position to the left
-                cache_k = torch.roll(cache_k, -1, dims=2)
-                cache_v = torch.roll(cache_v, -1, dims=2)
-            k = cache_k.index_copy_(2, input_pos, k)
-            v = cache_v.index_copy_(2, input_pos, v)
+                cache_k = torch.roll(cache_k, -1, dims=1)
+                cache_v = torch.roll(cache_v, -1, dims=1)
+
+            k = cache_k.index_copy_(1, input_pos, k)
+            v = cache_v.index_copy_(1, input_pos, v)
             kv_cache = k, v
 
         y = self.scaled_dot_product_attention(q, k, v, mask=mask)
@@ -267,6 +275,7 @@ class CausalSelfAttention(nn.Module):
         self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor, mask: Optional[torch.Tensor] = None
     ):
         scale = 1.0 / math.sqrt(self.config.head_size)
+        
         if (
             FlashAttention2Available
             and mask is None
@@ -276,7 +285,15 @@ class CausalSelfAttention(nn.Module):
             from flash_attn import flash_attn_func
 
             return flash_attn_func(q, k, v, dropout_p=0.0, softmax_scale=scale, causal=True)
-        assert False
+        q = q.transpose(1, 2)
+        k = k.transpose(1, 2)
+        v = v.transpose(1, 2)
+        if q.size() != k.size():
+             k = k.repeat_interleave(q.shape[1]//k.shape[1], dim=1)
+             v = v.repeat_interleave(q.shape[1]//v.shape[1], dim=1)
+        y = torch.nn.functional.scaled_dot_product_attention(
+            q, k, v, attn_mask=mask, dropout_p=0.0, scale=scale, is_causal=mask is None
+        )
         return y.transpose(1, 2)
 
 
