@@ -72,10 +72,15 @@ def prepare(
     chunk_size: int = 2049 * 1024,
     split: str="train",
     percentage: float = 1.0,
+    filenames_subset: List[str] = None,
 ) -> None:
     import time
     assert split == "train" #  starcoder only has train data
     filenames = glob.glob(os.path.join(source_path, "*/*.parquet"), recursive=True)
+    # only retrain subsets that follow the prefix in filenames_subset
+    if filenames_subset:
+        filenames = [f for f in filenames if any([prefix in f for prefix in filenames_subset])]
+    import pdb; pdb.set_trace()
     filenames = filenames[:int(len(filenames) * percentage)]
     num_processes = 32
     chunked_filenames = np.array_split(filenames, num_processes)

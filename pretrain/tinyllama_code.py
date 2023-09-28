@@ -23,8 +23,8 @@ from pytorch_lightning.loggers import WandbLogger
 from lit_gpt import FusedCrossEntropyLoss
 import random
 
-model_name = "tiny_LLaMA_1b_shift7"
-name = "tiny_LLaMA_1b_shift7"
+model_name = "tiny_LLaMA_1b"
+name = "tiny_LLaMA_1b"
 out_dir = Path("out") / name
 checkpoint_path = "out/TinyLlama-1.1B-intermediate-step-240k-503b/lit_model.pth"
 # Hyperparameters
@@ -62,7 +62,7 @@ log_iter_interval = log_step_interval * gradient_accumulation_steps
 
 # Treat all dataset equally by their size. If you want to use a different weight for a dataset, add it to the list with the weight.
 train_data_config = [
-    ("train_slim", 1),
+    ("train_starcoder", 1),
 ]
 
 val_data_config = [
@@ -215,9 +215,8 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
             param_group["lr"] = lr
 
         iter_t0 = time.perf_counter()
-        seq_length = (model.config.block_size + 1 - model.config.shift) // model.config.shift * model.config.shift
-        input_ids = train_data[:, 0 : seq_length].contiguous()
-        targets = train_data[:, model.config.shift: model.config.shift + seq_length].contiguous()
+        input_ids = train_data[:, 0 : model.config.block_size].contiguous()
+        targets = train_data[:, 1 : model.config.block_size + 1].contiguous()
 
         is_accumulating = (state["iter_num"] + 1) % gradient_accumulation_steps != 0
         with fabric.no_backward_sync(model, enabled=is_accumulating):
@@ -283,9 +282,8 @@ def validate(fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoade
     for k, val_data in enumerate(val_dataloader):
         if k >= eval_iters:
             break
-        seq_length = (model.config.block_size + 1 - model.config.shift) // model.config.shift * model.config.shift
-        input_ids = val_data[:, 0 : seq_length].contiguous()
-        targets = val_data[:, model.config.shift: model.config.shift + seq_length].contiguous()
+        input_ids = val_data[:, 0 : model.config.block_size].contiguous()
+        targets = val_data[:, 1 : model.config.block_size + 1].contiguous()
         logits = model(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
 

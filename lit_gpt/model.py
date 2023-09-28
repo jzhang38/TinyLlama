@@ -167,12 +167,8 @@ class Block(nn.Module):
         input_pos: Optional[torch.Tensor] = None,
         kv_cache: Optional[KVCache] = None,
     ) -> Tuple[torch.Tensor, Optional[KVCache]]:
-        if self.config.shift != 1:
-            # flow information within local window
-            mix = (x + x.view(x.shape[0], x.shape[1] // self.config.shift, self.config.shift, -1).mean(dim=2).repeat_interleave(self.config.shift, dim=1))/2
-        else: 
-            mix = x
-        n_1 = self.norm_1(mix)
+
+        n_1 = self.norm_1(x)
         h, new_kv_cache = self.attn(n_1, rope, max_seq_length, mask, input_pos, kv_cache)
         if self.config.parallel_residual:
             n_2 = n_1 if self.config.shared_attention_norm else self.norm_2(x)
