@@ -89,7 +89,7 @@ def generate(
 
 
 def main(
-    prompt: str = "Visit BBC News for up-to-the-minute news, breaking news, video, audio and feature stories. BBC News provides trusted World and UK news as well as local and",
+    prompt: str = "Hi. My name is",
     *,
     num_samples: int = 3,
     max_new_tokens: int = 50,
