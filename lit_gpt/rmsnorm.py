@@ -2,7 +2,7 @@ import torch
 # Copyright (c) 2022, Tri Dao.
 # Adapted from https://github.com/NVIDIA/apex/blob/master/apex/contrib/layer_norm/layer_norm.py AND https://github.com/Dao-AILab/flash-attention/blob/7a983df74215e035e566e37125b0a71e3618f39d/flash_attn/ops/layer_norm.py#L16
 
-# import dropout_layer_norm
+import dropout_layer_norm
 import torch
 from torch.nn import init
 

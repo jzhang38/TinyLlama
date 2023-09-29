@@ -1,10 +1,10 @@
-python scripts/convert_hf_checkpoint.py --checkpoint_dir  out/TinyLlama-1.1B-intermediate-step-240k-503b --model_name tiny_LLaMA_1b
+python scripts/convert_hf_checkpoint.py --checkpoint_dir  out/TinyLlama-1.1B-intermediate-900B --model_name tiny_LLaMA_1b
 
-python test_weight.py --checkpoint_dir out/TinyLlama-1.1B-intermediate-step-240k-503b 
-
-
-python pretrain/tinyllama_code.py --devices 6 --train_data_dir data/python_only
+python test_weight.py --checkpoint_dir out/TinyLlama-1.1B-intermediate-900B
 
 
+python pretrain/tinyllama_code.py --devices 8 --train_data_dir data/code_specialist_python_java_javascript_8192
 
-python scripts/prepare_starcoder.py --source_path data/starcoder/starcoderdata --tokenizer_path data/llama --destination_path python_only --split train --percentage 1 --filenames_subset [python]
+
+
+python scripts/prepare_starcoder.py --source_path data/starcoderdata/ --tokenizer_path data/llama --destination_path data/code_specialist_python_java_javascript_8192 --split train --percentage 1.0 --filenames_subset ["python","java","javascript"] --chunk_size 4194816

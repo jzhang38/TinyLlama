@@ -23,17 +23,17 @@ from pytorch_lightning.loggers import WandbLogger
 from lit_gpt import FusedCrossEntropyLoss
 import random
 
-model_name = "tiny_LLaMA_1b"
-name = "tiny_LLaMA_1b"
+model_name = "code_tiny_LLaMA_1b"
+name = "code_tiny_LLaMA_1b"
 out_dir = Path("out") / name
-checkpoint_path = "out/TinyLlama-1.1B-intermediate-step-240k-503b/lit_model.pth"
+checkpoint_path = "/root/peiyuan/TinyLlama/out/TinyLlama-1.1B-intermediate-900B/lit_model.pth"
 # Hyperparameters
-num_of_devices = 6
-global_batch_size = 360
+num_of_devices = 8
+global_batch_size = 256
 learning_rate = 2e-4
-micro_batch_size = 6
-max_step = 10000
-warmup_steps = 0 
+micro_batch_size = 1
+max_step = 5000 
+warmup_steps = 0
 log_step_interval = 1
 eval_iters = 1000000
 save_step_interval = 2000
@@ -144,6 +144,10 @@ def main(fabric, train_data_dir, val_data_dir, resume):
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=(beta1, beta2), foreach=False
     )
+    # import bitsandbytes as bnb
+    # optimizer = bnb.optim.AdamW8bit(
+    #     model.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=(beta1, beta2)
+    # )
     # optimizer = FusedAdam(model.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=(beta1, beta2),adam_w_mode=True)
     optimizer = fabric.setup_optimizers(optimizer)
 

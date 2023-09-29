@@ -3,7 +3,7 @@
 from transformers import AutoTokenizer
 import transformers 
 import torch
-model = "PY007/TinyLlama-1.1B-Chat-v0.1"
+model = "out/TinyLlama-1.1B-intermediate-900B"
 tokenizer = AutoTokenizer.from_pretrained(model)
 pipeline = transformers.pipeline(
     "text-generation",
@@ -16,7 +16,6 @@ prompt = "Give me detailed info about Jeo Biden."
 formatted_prompt = (
     f"### Human: {prompt} ### Assistant:"
 )
-
 
 sequences = pipeline(
     formatted_prompt,
