@@ -396,6 +396,8 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
             return load_dataset("OpenAssistant/oasst_top1_2023-08-25")
         elif dataset_name == 'vicuna':
             raise NotImplementedError("Vicuna data was not released.")
+        elif dataset_name == "Tianduo/rag_oasst":
+            return load_dataset("Tianduo/rag_oasst")
         else:
             if os.path.exists(dataset_name):
                 try:
@@ -516,7 +518,7 @@ def train():
     set_seed(args.seed)
 
     data_module = make_data_module(tokenizer=tokenizer, args=args)
-    
+
     trainer = Seq2SeqTrainer(
         model=model,
         tokenizer=tokenizer,
