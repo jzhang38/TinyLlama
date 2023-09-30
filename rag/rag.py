@@ -17,12 +17,13 @@ def load_data(fname):
 
 
 def retrieve_doc(query):
-	# Now assume only select top documents with first 100 words
 	return_lst = []
 	docs = retriever.get_relevant_documents(query=query)
-	doc_text = docs[0].page_content
-	doc_text_split = doc_text.split()
-	return_lst.append(' '.join(doc_text_split[:100]))
+	if len(docs) > 0:
+		for d in docs:
+			title = d.metadata['title']
+			summary = d.metadata['summary']
+			return_lst.append(f'Title: {title}. Summary: {summary}')
 	return return_lst
 
 
@@ -53,20 +54,24 @@ def evaluate_one(predict_seq, gold_ans):
 
 if __name__ == '__main__':
 	# load data
-	instances = load_data('/data/tianduo/atlas_data/data/nq_data/test.jsonl')
+	instances = load_data('/data/rag_tinyllama/nq_data/test_doc.jsonl')
 	print(f'\nLoad {len(instances)} instances for evaluation.')
 
+	# exit()
+
 	# load model
-	tokenizer = AutoTokenizer.from_pretrained('tinyllama-tf')
-	model = AutoModelForCausalLM.from_pretrained('tinyllama-tf').cuda()
+	model_name = 'tinyllama-tf'
+	tokenizer = AutoTokenizer.from_pretrained(model_name)
+	model = AutoModelForCausalLM.from_pretrained(model_name).cuda()
 
 	f1_scores = []
 	em = 0
 	for inst in tqdm(instances[:100]):
-		question, ans_lst = inst['question'], inst['answers']
+		question, ans_lst = inst['question'], inst['answer']
 		
 		# Retrieve documents
-		retrieved_docs = retrieve_doc(question)
+		# retrieved_docs = retrieve_doc(question)
+		retrieved_docs = inst['docs']
 		# retrieved_docs = []
 
 		# build inputs
@@ -88,7 +93,7 @@ if __name__ == '__main__':
 			em += 1
 
 	print('Finish evaluation...')
-	print(f'F1 score: {sum(f1_scores) / len(f1_scores)}')
+	print(f'F1 score: {sum(f1_scores) / len(f1_scores):.3f}')
 	print(f'Exact match: {em / len(f1_scores)}, {em} / {len(f1_scores)}')
 
 
