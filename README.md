@@ -15,6 +15,7 @@ The TinyLlama project aims to **pretrain** a **1.1B Llama model on 3 trillion to
 We adopted exactly the same architecture and tokenizer as Llama 2. This means TinyLlama can be plugged and played in many open-source projects built upon Llama. Besides, TinyLlama is compact with only 1.1B parameters. This compactness allows it to cater to a multitude of applications demanding a restricted computation and memory footprint.
 
 #### News
+- 2023-10-02: 1. 1T-token checkpoint just dropped. 2. We document **all** intermediate checkpoints [here](https://huggingface.co/TinyLlama/tinyLlama-intermediate-checkpoints/tree/step-480k-token-1007B).
 - 2023-09-28: Add a discord server.
 - 2023-09-18: 1. We added a [chat demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat) so that you can play with TinyLlama-Chat-V0.1 right away. 
 - 2023-09-16: 1. We released the intermediate checkpoint trained on 503B tokens. 2. We released a chat model finetuned on OpenAssisant and simple [finetuning](sft) scripts is added. 3. More eval benchmarks are added and documented in [EVAL.md](EVAL.md). 
@@ -25,17 +26,24 @@ You can find the evaluation results of TinyLlama in [EVAL.md](EVAL.md).
 #### Releases Schedule
 We will be rolling out intermediate checkpoints following the below schedule. 
 
+Base models:
+
 | Date       | HF Checkpoint                                   | Tokens | Step | Commonsense Avg |
 |------------|-------------------------------------------------|--------|------| --------------- |
 | 2023-09-01 | Pythia-1.0B                                     | 300B   | 143k   | 48.30 |
 | 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://huggingface.co/PY007/TinyLlama-1.1B-step-50K-105b) | 105B   | 50k   | 46.11|
 | 2023-09-16 | [TinyLlama-1.1B-intermediate-step-240k-503b](https://huggingface.co/PY007/TinyLlama-1.1B-intermediate-step-240k-503b)                                            | 503B   | 240K    | 48.28 |
-| 2023-09-16 | [TinyLlama-1.1B-Chat-V0.1](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)                                            | 503B   | 240K    |  49.57 |
-| 2023-10-01 | --                                             | 1T     | --    | -- |
+| 2023-10-01 | [TinyLlama-1.1B-intermediate-step-480k-1T](https://huggingface.co/PY007/TinyLlama-1.1B-intermediate-step-480k-1T) | 1T     | 480k | 50.22 |
 | 2023-10-16 | --                                             | 1.5T   | --    |-- |
 | 2023-10-31 | --                                             | 2T     | --    |-- |
 | 2023-11-15 | --                                             | 2.5T   | --    |-- |
 | 2023-12-01 | --                                             | 3T     | --    |-- |
+
+Chat models:
+
+| Date       | HF Checkpoint                                   | Tokens | Step | Commonsense Avg |
+|------------|-------------------------------------------------|--------|------| --------------- |
+| 2023-09-16 | [TinyLlama-1.1B-Chat-V0.1](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)                                            | 503B   | 240K    |  49.57 |
 
 Note that the learning rate of the base model has not cooled down yet so we recommend you to also use the finetuned chat model.
 

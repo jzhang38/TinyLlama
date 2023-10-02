@@ -30,13 +30,13 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 
 我们会根据以下计划逐步发布中间checkpoint。我们也列了一些基线模型进行比较。
 
-| Date       | ModelScope 模型                                                | Tokens | Step | Commonsense Avg |
+| Date       | ModelScope 模型                                              | Tokens | Step | Commonsense Avg |
 | ---------- | ------------------------------------------------------------ | ------ | ---- | --------------- |
 | 2023-09-01 | Pythia-1.0B                                                  | 300B   | 143k | 48.30           |
 | 2023-09-04 | [TinyLlama-1.1B-intermediate-step-50k-105b](https://www.modelscope.cn/models/chaoscodes/TinyLlama-1.1B-step-50K-105b/files) | 105B   | 50k  | 46.11           |
 | 2023-09-16 | [TinyLlama-1.1B-intermediate-step-240k-503b](https://www.modelscope.cn/models/chaoscodes/TinyLlama-1.1B-intermediate-step-240k-503b/files) | 503B   | 240K | 48.28           |
 | 2023-09-16 | [TinyLlama-1.1B-Chat-V0.1](https://www.modelscope.cn/models/chaoscodes/TinyLlama-1.1B-Chat-v0.1/files) | 503B   | 240K | 49.57           |
-| 2023-10-01 | --                                                           | 1T     | --   | --              |
+| 2023-10-01 | TinyLlama-1.1B-intermediate-step-480k-1007B                  | 1T     | 480K | 50.22           |
 | 2023-10-16 | --                                                           | 1.5T   | --   | --              |
 | 2023-10-31 | --                                                           | 2T     | --   | --              |
 | 2023-11-15 | --                                                           | 2.5T   | --   | --              |
