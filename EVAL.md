@@ -44,6 +44,7 @@ We evaluate TinyLlama's ability in problem-solving on the [Instruct-Eval](https:
 | TinyLlama-1.1B-intermediate-step-50K-104b | 26.45|28.82 |5.49       |11.42 |
 | TinyLlama-1.1B-intermediate-step-240k-503b|26.16 |  28.83   |4.88       | 12.43|
 | TinyLlama-1.1B-Chat-v0.1                  |26.73 |  28.79   | 3.05     |  11.92 |
+| TinyLlama-1.1B-Chat-v0.3                  |25.42 |  --  | 5.49     |  12.36 |
 
 
 You can obtain above scores by running [instruct-eval](https://github.com/declare-lab/instruct-eval):
