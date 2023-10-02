@@ -16,8 +16,10 @@ Base models:
 Chat models:
 | Model                                     | Pretrain Tokens | HellaSwag | Obqa | WinoGrande | ARC_c | ARC_e | boolq | piqa | avg |
 |-------------------------------------------|-----------------|-----------|------|------------|-------|-------|-------|------|-----|
-| TinyLlama-1.1B-Chat-v0.1                  |        503B     | 53.81     |32.20 |55.01       |28.67  |49.62  |58.04  |69.64  | 49.57 |
-| TinyLlama-1.1B-Chat-v0.2                  |        503B     | 53.63     |32.80 | 54.85      |28.75  |49.16  | 55.72 |69.48  | 49.20 |
+| [TinyLlama-1.1B-Chat-v0.1](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)                 |        503B     | 53.81     |32.20 |55.01       |28.67  |49.62  |58.04  |69.64  | 49.57 |
+| [TinyLlama-1.1B-Chat-v0.2](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.2)                   |        503B     | 53.63     |32.80 | 54.85      |28.75  |49.16  | 55.72 |69.48  | 49.20 |
+| [TinyLlama-1.1B-Chat-v0.3](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.3)                   |   1T            | 56.81     |34.20| 55.80       | 30.03 |53.20  | 59.57 | 69.91| 51.36
+
 
 We observed huge improvements once we finetuned the model. We attribute this phenomenon to: 1. the base model has not undergone lr cool-down and FT helps to cool down the lr. 2. the SFT stage better elicits the model's internal knowledge.
 
