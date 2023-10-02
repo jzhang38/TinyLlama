@@ -4,14 +4,20 @@
 
 We evaluate TinyLlama's commonsense reasoning ability following the [GPT4All](https://gpt4all.io/index.html) evaluation suite. We include Pythia as our baseline. We report the acc_norm by default. 
 
+Base models:
+
 | Model                                     | Pretrain Tokens | HellaSwag | Obqa | WinoGrande | ARC_c | ARC_e | boolq | piqa | avg |
 |-------------------------------------------|-----------------|-----------|------|------------|-------|-------|-------|------|-----|
 | Pythia-1.0B                               |        300B     | 47.16     | 31.40| 53.43      | 27.05 | 48.99 | 60.83 | 69.21 | 48.30 |
 | TinyLlama-1.1B-intermediate-step-50K-104b |        103B     | 43.50     | 29.80| 53.28      | 24.32 | 44.91 | 59.66 | 67.30 | 46.11|
 | TinyLlama-1.1B-intermediate-step-240k-503b|        503B     | 49.56     |31.40 |55.80       |26.54  |48.32  |56.91  |69.42  | 48.28 |
-| TinyLlama-1.1B-Chat-v0.1                  |        503B     | 53.81     |32.20 |55.01       |28.67  |49.62  |58.04  |69.64  | 49.57 |
 | TinyLlama-1.1B-intermediate-step-480k-1007B |     1007B     | 52.54     | 33.40 | 55.96      | 27.82 | 52.36 | 59.54 | 69.91 | 50.22 |
-<!-- | TinyLlama-1.1B-Chat-v0.2                  |        503B     | 53.63     |32.80 | 54.85      |28.75  |49.16  | 55.72 |69.48  | 49.20 | -->
+
+Chat models:
+| Model                                     | Pretrain Tokens | HellaSwag | Obqa | WinoGrande | ARC_c | ARC_e | boolq | piqa | avg |
+|-------------------------------------------|-----------------|-----------|------|------------|-------|-------|-------|------|-----|
+| TinyLlama-1.1B-Chat-v0.1                  |        503B     | 53.81     |32.20 |55.01       |28.67  |49.62  |58.04  |69.64  | 49.57 |
+| TinyLlama-1.1B-Chat-v0.2                  |        503B     | 53.63     |32.80 | 54.85      |28.75  |49.16  | 55.72 |69.48  | 49.20 |
 
 We observed huge improvements once we finetuned the model. We attribute this phenomenon to: 1. the base model has not undergone lr cool-down and FT helps to cool down the lr. 2. the SFT stage better elicits the model's internal knowledge.
 
