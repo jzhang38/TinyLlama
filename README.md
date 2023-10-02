@@ -45,6 +45,8 @@ Chat models:
 |------------|-------------------------------------------------|--------|------| --------------- |
 | 2023-09-16 | [TinyLlama-1.1B-Chat-V0.1](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)                                            | 503B   | 240K    |  49.57 |
 | 2023-09-16 | [TinyLlama-1.1B-Chat-V0.3](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.3)                                            | 1T   | 480K    |  51.36 |
+
+
 Note that the learning rate of the base model has not cooled down yet so we recommend you to also use the finetuned chat model.
 
 Meanwhile, you can track the live cross entropy loss [here](https://wandb.ai/lance777/lightning_logs/reports/metric-train_loss-23-09-04-23-38-15---Vmlldzo1MzA4MzIw?accessToken=5eu2sndit2mo6eqls8h38sklcgfwt660ek1f2czlgtqjv2c6tida47qm1oty8ik9).
