@@ -45,7 +45,7 @@ Chat models:
 | Date       | HF Checkpoint                                   | Tokens | Step | Commonsense Avg |
 |------------|-------------------------------------------------|--------|------| --------------- |
 | 2023-09-16 | [TinyLlama-1.1B-Chat-V0.1](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)                                            | 503B   | 240K    |  49.57 |
-| 2023-09-16 | [TinyLlama-1.1B-Chat-V0.3](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.3)                                            | 1T   | 480K    |  51.36 |
+| 2023-10-1 | [TinyLlama-1.1B-Chat-V0.3](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.3)                                            | 1T   | 480K    |  51.36 |
 
 
 Note that the learning rate of the base model has not cooled down yet so we recommend you to also use the finetuned chat model.
