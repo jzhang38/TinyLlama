@@ -140,7 +140,7 @@ def copy_weights_llama(
             q = "model.layers.{}.self_attn.q_proj.weight".format(number)
             k = "model.layers.{}.self_attn.k_proj.weight".format(number)
             v = "model.layers.{}.self_attn.v_proj.weight".format(number)
-            qkv = load_param(param, name, None)
+            qkv = load_param(param, name,None)
             qp, kp, vp = tensor_split(qkv, config)
             for to_name, param in zip((q, k, v), (qp, kp, vp)):
                 if saver is not None:
@@ -153,7 +153,7 @@ def copy_weights_llama(
             if to_name is None:
                 continue
             to_name = to_name.format(number)
-            param = load_param(param, name, None)
+            param = load_param(param, name,None)
             if saver is not None:
                 param = saver.store_early(param)
             state_dict[to_name] = param
