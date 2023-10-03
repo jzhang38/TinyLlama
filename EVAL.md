@@ -16,8 +16,10 @@ Base models:
 Chat models:
 | Model                                     | Pretrain Tokens | HellaSwag | Obqa | WinoGrande | ARC_c | ARC_e | boolq | piqa | avg |
 |-------------------------------------------|-----------------|-----------|------|------------|-------|-------|-------|------|-----|
-| TinyLlama-1.1B-Chat-v0.1                  |        503B     | 53.81     |32.20 |55.01       |28.67  |49.62  |58.04  |69.64  | 49.57 |
-| TinyLlama-1.1B-Chat-v0.2                  |        503B     | 53.63     |32.80 | 54.85      |28.75  |49.16  | 55.72 |69.48  | 49.20 |
+| [TinyLlama-1.1B-Chat-v0.1](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)                 |        503B     | 53.81     |32.20 |55.01       |28.67  |49.62  |58.04  |69.64  | 49.57 |
+| [TinyLlama-1.1B-Chat-v0.2](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.2)                   |        503B     | 53.63     |32.80 | 54.85      |28.75  |49.16  | 55.72 |69.48  | 49.20 |
+| [TinyLlama-1.1B-Chat-v0.3](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.3)                   |   1T            | 56.81     |34.20| 55.80       | 30.03 |53.20  | 59.57 | 69.91| 51.36
+
 
 We observed huge improvements once we finetuned the model. We attribute this phenomenon to: 1. the base model has not undergone lr cool-down and FT helps to cool down the lr. 2. the SFT stage better elicits the model's internal knowledge.
 
@@ -41,12 +43,12 @@ We evaluate TinyLlama's ability in problem-solving on the [Instruct-Eval](https:
 | Pythia-1.0B                               | 25.70| 28.19| 1.83      | 4.25 |
 | TinyLlama-1.1B-intermediate-step-50K-104b | 26.45|28.82 |5.49       |11.42 |
 | TinyLlama-1.1B-intermediate-step-240k-503b|26.16 |  28.83   |4.88       | 12.43|
-| TinyLlama-1.1B-Chat-v0.1                  |26.73 |  28.79   | 3.05     |  11.92 |
+| TinyLlama-1.1B-intermediate-step-480K-1T  |24.65 | 29.21  |  6.1     | 13.03 |
 
 
 You can obtain above scores by running [instruct-eval](https://github.com/declare-lab/instruct-eval):
 ```bash
-CUDA_VISIBLE_DEVICES=0 python main.py mmlu --model_name llama --model_path PY007/TinyLlama-1.1B-Chat-v0.1
-CUDA_VISIBLE_DEVICES=1 python main.py bbh --model_name llama --model_path PY007/TinyLlama-1.1B-Chat-v0.1
-CUDA_VISIBLE_DEVICES=2 python main.py drop --model_name llama --model_path PY007/TinyLlama-1.1B-Chat-v0.1
-CUDA_VISIBLE_DEVICES=3 python main.py humaneval  --model_name llama  --n_sample 1 --model_path PY007/TinyLlama-1.1B-Chat-v0.1
+CUDA_VISIBLE_DEVICES=0 python main.py mmlu --model_name llama --model_path PY007/TinyLlama-1.1B-intermediate-step-480K-1T
+CUDA_VISIBLE_DEVICES=1 python main.py bbh --model_name llama --model_path PY007/TinyLlama-1.1B-intermediate-step-480K-1T
+CUDA_VISIBLE_DEVICES=2 python main.py drop --model_name llama --model_path PY007/TinyLlama-1.1B-intermediate-step-480K-1T
+CUDA_VISIBLE_DEVICES=3 python main.py humaneval  --model_name llama  --n_sample 1 --model_path PY007/TinyLlama-1.1B-intermediate-step-480K-1T
