@@ -24,8 +24,6 @@ from lit_gpt import FusedCrossEntropyLoss
 import random
 
 
-
-
 model_name = "tiny_LLaMA_1b"
 name = "tiny_LLaMA_1b"
 out_dir = Path("out") / name
@@ -34,7 +32,7 @@ checkpoint_path = "out/TinyLlama-1.1B-intermediate-step-240k-503b/lit_model.pth"
 num_of_devices = 6
 global_batch_size = 360
 learning_rate = 2e-4
-min_lr = 1e-5
+min_lr = 2e-5
 micro_batch_size = 6
 max_step = 10000
 warmup_steps = 0 
