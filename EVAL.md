@@ -43,14 +43,12 @@ We evaluate TinyLlama's ability in problem-solving on the [Instruct-Eval](https:
 | Pythia-1.0B                               | 25.70| 28.19| 1.83      | 4.25 |
 | TinyLlama-1.1B-intermediate-step-50K-104b | 26.45|28.82 |5.49       |11.42 |
 | TinyLlama-1.1B-intermediate-step-240k-503b|26.16 |  28.83   |4.88       | 12.43|
-| TinyLlama-1.1B-Chat-v0.1                  |26.73 |  28.79   | 3.05     |  11.92 |
 | TinyLlama-1.1B-intermediate-step-480K-1T  |24.65 | 29.21  |  6.1     | 13.03 |
-| TinyLlama-1.1B-Chat-v0.3                  |25.42 |  28.62  | 5.49     |  12.36 |
 
 
 You can obtain above scores by running [instruct-eval](https://github.com/declare-lab/instruct-eval):
 ```bash
-CUDA_VISIBLE_DEVICES=0 python main.py mmlu --model_name llama --model_path PY007/TinyLlama-1.1B-Chat-v0.1
-CUDA_VISIBLE_DEVICES=1 python main.py bbh --model_name llama --model_path PY007/TinyLlama-1.1B-Chat-v0.1
-CUDA_VISIBLE_DEVICES=2 python main.py drop --model_name llama --model_path PY007/TinyLlama-1.1B-Chat-v0.1
-CUDA_VISIBLE_DEVICES=3 python main.py humaneval  --model_name llama  --n_sample 1 --model_path PY007/TinyLlama-1.1B-Chat-v0.1
+CUDA_VISIBLE_DEVICES=0 python main.py mmlu --model_name llama --model_path PY007/TinyLlama-1.1B-intermediate-step-480K-1T
+CUDA_VISIBLE_DEVICES=1 python main.py bbh --model_name llama --model_path PY007/TinyLlama-1.1B-intermediate-step-480K-1T
+CUDA_VISIBLE_DEVICES=2 python main.py drop --model_name llama --model_path PY007/TinyLlama-1.1B-intermediate-step-480K-1T
+CUDA_VISIBLE_DEVICES=3 python main.py humaneval  --model_name llama  --n_sample 1 --model_path PY007/TinyLlama-1.1B-intermediate-step-480K-1T
