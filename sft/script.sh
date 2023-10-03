@@ -39,9 +39,9 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 accelerate launch --multi_gpu --num_processes 4 --m
     --report_to wandb 
 
 
-# V0.1 
-CUDA_VISIBLE_DEVICES=4,5,6,7 accelerate launch --multi_gpu --num_processes 4 --main_process_port 1234 finetune.py \
-    --model_name_or_path PY007/TinyLlama-1.1B-intermediate-step-240k-503b \
+# V0.2
+CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --multi_gpu --num_processes 4 --main_process_port 1234 finetune.py \
+    --model_name_or_path PY007/TinyLlama-1.1B-intermediate-step-480k-1T \
     --output_dir ./output/503B_FT_lr1e-5_ep5_top1_2023-08-25 \
     --logging_steps 10 \
     --save_strategy epoch \
