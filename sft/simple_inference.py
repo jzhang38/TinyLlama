@@ -1,9 +1,7 @@
-
-
 from transformers import AutoTokenizer
 import transformers 
 import torch
-model = "/data/TinyLlama/out/TinyLlama-1.1B-900B-code-preview"
+model = "PY007/TinyLlama-1.1B-Chat-v0.1"
 tokenizer = AutoTokenizer.from_pretrained(model)
 pipeline = transformers.pipeline(
     "text-generation",
@@ -12,10 +10,11 @@ pipeline = transformers.pipeline(
     device_map="auto",
 )
 
-prompt = "Quick Sort Implementation in golang"
+prompt = "Give me detailed info about Jeo Biden."
 formatted_prompt = (
     f"### Human: {prompt} ### Assistant:"
 )
+
 
 sequences = pipeline(
     formatted_prompt,
