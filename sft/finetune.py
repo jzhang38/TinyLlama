@@ -196,20 +196,16 @@ def get_accelerate_model(args, checkpoint_dir):
         trust_remote_code=args.trust_remote_code,
     )
     if tokenizer._pad_token is None:
-        non_special_tokens = []
+        special_tokens_dict = dict(pad_token=DEFAULT_PAD_TOKEN)
         if args.dataset == "OpenAssistant/oasst_top1_2023-08-25":
-            non_special_tokens = ["<|im_start|>", "<|im_end|>",]
+            chat_special_tokens = ["<|im_start|>", "<|im_end|>"]
+            special_tokens_dict.update(additional_special_tokens=chat_special_tokens)
+
         smart_tokenizer_and_embedding_resize(
-            special_tokens_dict=dict(pad_token=DEFAULT_PAD_TOKEN),
+            special_tokens_dict=special_tokens_dict,
             tokenizer=tokenizer,
-            model=model,
-            non_special_tokens=non_special_tokens,
+            model=model
         )
-        
-
-    
-    
-
 
     return model, tokenizer
 
