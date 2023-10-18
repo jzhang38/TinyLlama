@@ -121,7 +121,7 @@ def main(fabric, train_data_dir, val_data_dir, resume):
         fabric=fabric,
         train_data_dir=train_data_dir,
         val_data_dir=val_data_dir,
-        seed=(3407 + fabric.global_rank),
+        seed=3407,
     )
     if val_dataloader is None:
         train_dataloader = fabric.setup_dataloaders(train_dataloader)
@@ -315,7 +315,7 @@ def create_dataloader(
             n_chunks=8,
             block_size=block_size,
             shuffle=shuffle,
-            seed=seed,
+            seed=seed+fabric.global_rank,
             num_processes=fabric.world_size,
             process_rank=fabric.global_rank,
         )
