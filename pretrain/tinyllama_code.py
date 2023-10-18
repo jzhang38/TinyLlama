@@ -307,7 +307,7 @@ def create_dataloader(
     datasets = []
     data_config = train_data_config if split == "train" else val_data_config
     for prefix, _ in data_config:
-        filenames = glob.glob(str(data_dir / f"{prefix}*"))
+        filenames = sorted(glob.glob(str(data_dir / f"{prefix}*")))
         random.seed(seed)
         random.shuffle(filenames)
 
