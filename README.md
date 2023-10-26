@@ -155,7 +155,7 @@ This repository is built upon [lit-gpt](https://github.com/Lightning-AI/lit-gpt)
 ```
 
 ## Citation
-This project is currently contributed by [Peiyuan Zhang](https://github.com/jzhang38), [Guangtao Zeng](https://github.com/ChaosCodes), [Tianduo Wang](https://github.com/TianduoWang) and [Wei Lu](https://istd.sutd.edu.sg/people/faculty/lu-wei/). 
+This project is currently contributed by [Peiyuan Zhang](https://veiled-texture-20c.notion.site/Peiyuan-Zhang-ab24b48621c9491db767a76df860873a?pvs=4), [Guangtao Zeng](https://github.com/ChaosCodes), [Tianduo Wang](https://github.com/TianduoWang) and [Wei Lu](https://istd.sutd.edu.sg/people/faculty/lu-wei/) from the StatNLP Research Group of Singapore University of Technology and Design. 
 
 If you find our work valuable, please cite:
 
