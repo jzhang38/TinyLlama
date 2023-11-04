@@ -36,10 +36,11 @@ Base models:
 | 2023-09-16 | [TinyLlama-1.1B-intermediate-step-240k-503b](https://huggingface.co/PY007/TinyLlama-1.1B-intermediate-step-240k-503b)                                            | 503B   | 240K    | 48.28 |
 | 2023-10-01 | [TinyLlama-1.1B-intermediate-step-480k-1T](https://huggingface.co/PY007/TinyLlama-1.1B-intermediate-step-480k-1T) | 1T     | 480k | 50.22 |
 | ~~2023-10-16~~ | We will postpone the release of TinyLlama 1.5T checkpoint ([click here for more information](https://whimsical-aphid-86d.notion.site/Release-of-TinyLlama-1-5T-Checkpoints-Postponed-01b266998c1c47f78f5ae1520196d194?pvs=4))                                      | ~1.5T~   | --    |-- |
-| 2023-10-31 | --                                             | 1.5T     | --    |-- |
-| 2023-11-15 | --                                             | 2T   | --    |-- |
-| 2023-12-01 | --                                             | 2.5T     | --    |-- |
-| 2023-12-16 | --                                             | 3T   | --    |-- |
+| 2023-11-04 | [TinyLlama-1.1B-intermediate-step-715k-1.5T](https://huggingface.co/PY007/TinyLlama-1.1B-intermediate-step-715k-1.5T)                                            | 1.5T     |715k    |51.28 |
+| 2023-11-20 | --                                             | 2T   | --    |-- |
+| 2023-12-05 | --                                             | 2.5T     | --    |-- |
+| 2023-12-20 | --                                             | 3T   | --    |-- |
+
 
 Chat models:
 
