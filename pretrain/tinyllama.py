@@ -249,6 +249,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
             t1 - total_t0,
             # this assumes that device FLOPs are the same and that all devices have the same batch size
             fabric.world_size,
+            state["step_count"],
             flops_per_batch=estimated_flops,
             lengths=total_lengths,
             train_loss = loss.item()
@@ -264,8 +265,8 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
             t1 = time.perf_counter() - t0
             monitor.eval_end(t1)
             fabric.print(f"step {state['iter_num']}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms")
-            fabric.log_dict({"metric/val_loss": val_loss.item(), "total_tokens":  model.config.block_size * (state["iter_num"] + 1) * micro_batch_size * fabric.world_size},state["step_count"])
-            fabric.log_dict({"metric/val_ppl": math.exp(val_loss.item()), "total_tokens":  model.config.block_size * (state["iter_num"] + 1) * micro_batch_size * fabric.world_size},state["step_count"])
+            fabric.log_dict({"metric/val_loss": val_loss.item(), "total_tokens": model.config.block_size * (state["iter_num"] + 1) * micro_batch_size * fabric.world_size}, state["step_count"])
+            fabric.log_dict({"metric/val_ppl": math.exp(val_loss.item()), "total_tokens": model.config.block_size * (state["iter_num"] + 1) * micro_batch_size * fabric.world_size}, state["step_count"])
             fabric.barrier()
         if not is_accumulating and state["step_count"] % save_step_interval == 0:
             checkpoint_path = out_dir / f"iter-{state['iter_num']:06d}-ckpt.pth"
