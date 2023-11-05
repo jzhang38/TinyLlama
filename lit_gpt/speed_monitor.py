@@ -221,6 +221,7 @@ class SpeedMonitorBase:
         samples: int,  # total samples seen (per device)
         train_elapsed: float,  # total training time (seconds)
         world_size: int,
+        step_count: int,
         flops_per_batch: Optional[int] = None,  # (per device)
         lengths: Optional[int] = None,  # total length of the samples seen (per device)
         train_loss: Optional[float] = None,
@@ -291,7 +292,7 @@ class SpeedMonitorBase:
             }
         )
         if self.iter % self.log_iter_interval == 0:
-            self.log_dict(metrics, self.iter//self.log_iter_interval)
+            self.log_dict(metrics, step_count)
 
     def eval_end(self, eval_elapsed: float):
         self.total_eval_wct += eval_elapsed  # seconds
