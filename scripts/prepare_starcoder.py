@@ -62,7 +62,8 @@ def prepare_full(
             text_ids = tokenizer.encode(text)
             builder.add_array(np.array(text_ids, dtype=builder.dtype))
 
-    builder.write_reminder()
+    # we throw away the final corpus to avoid meaningless corpus filled with bos_ids, see https://github.com/jzhang38/TinyLlama/issues/83 for more details
+    # builder.write_reminder()
 
 
 def prepare(
@@ -80,7 +81,6 @@ def prepare(
     # only retrain subsets that follow the prefix in filenames_subset
     if filenames_subset:
         filenames = [f for f in filenames if any([prefix in f for prefix in filenames_subset])]
-    import pdb; pdb.set_trace()
     filenames = filenames[:int(len(filenames) * percentage)]
     num_processes = 64
     chunked_filenames = np.array_split(filenames, num_processes)
