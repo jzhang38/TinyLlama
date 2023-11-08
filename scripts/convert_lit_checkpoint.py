@@ -229,20 +229,8 @@ def check_conversion_supported(lit_weights: Dict[str, torch.Tensor]) -> None:
         raise NotImplementedError("Converting models finetuned with adapter not yet supported.")
 
 
-def lit_to_hf_model_config_mapping(model_name: str) -> dict:
-    lit_config_dict = asdict(Config.from_name(model_name))
-    lit_hf_mapping = {
-        "block_size": "max_position_embeddings",
-        "vocab_size": "vocab_size",
-        "n_layer": "num_hidden_layers",
-        "n_embd": "hidden_size",
-        "n_head": "num_attention_heads",
-        "n_query_groups": "num_key_value_heads",
-        "intermediate_size": "intermediate_size",
-        "norm_eps": "rms_norm_eps",
-
-    }
-    hf_config_dict = {
+def get_tinyllama_init_hf_config() -> dict:
+    return {
         "architectures": ["LlamaForCausalLM"],
         "bos_token_id": 1,
         "eos_token_id": 2,
@@ -264,6 +252,21 @@ def lit_to_hf_model_config_mapping(model_name: str) -> dict:
         "use_cache": True,
         "vocab_size": None,
     }
+
+
+def convert_config_lit_to_hf(lit_config_dict: dict) -> dict:
+    lit_hf_mapping = {
+        "block_size": "max_position_embeddings",
+        "vocab_size": "vocab_size",
+        "n_layer": "num_hidden_layers",
+        "n_embd": "hidden_size",
+        "n_head": "num_attention_heads",
+        "n_query_groups": "num_key_value_heads",
+        "intermediate_size": "intermediate_size",
+        "norm_eps": "rms_norm_eps",
+
+    }
+    hf_config_dict = get_tinyllama_init_hf_config()
     
     for lit_key, hf_key in lit_hf_mapping.items():
         hf_config_dict[hf_key] = lit_config_dict[lit_key]
@@ -271,7 +274,11 @@ def lit_to_hf_model_config_mapping(model_name: str) -> dict:
 
 
 @torch.inference_mode()
-def convert_lit_checkpoint(*, checkpoint_name: str, out_dir: Path, model_name: str) -> None:
+def convert_lit_checkpoint(*, 
+    checkpoint_name: str, 
+    out_dir: Path, 
+    model_name: str,
+    model_only: bool = True) -> None:
     config = Config.from_name(model_name)
 
     if "falcon" in model_name:
@@ -300,10 +307,13 @@ def convert_lit_checkpoint(*, checkpoint_name: str, out_dir: Path, model_name: s
         saver.save(sd)
 
     # convert lit config file to hf-style
-    hf_config = lit_to_hf_model_config_mapping(model_name)
-    config_path = out_dir / "config.json"
-    with open(config_path, "w") as f:
-        json.dump(hf_config, f, indent=4)
+    if not model_only:
+        print('Converting config file...')
+        lit_config = asdict(config)
+        hf_config = convert_config_lit_to_hf(lit_config)
+        config_path = out_dir / "config.json"
+        with open(config_path, "w") as f:
+            json.dump(hf_config, f, indent=4)
 
 
 
