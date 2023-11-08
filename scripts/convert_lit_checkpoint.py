@@ -4,7 +4,8 @@ import sys
 from functools import partial
 from pathlib import Path
 from typing import Dict, Literal, Optional, Tuple, Union
-
+from dataclasses import asdict
+import json
 import torch
 
 # support running without installing as a package
@@ -257,8 +258,36 @@ def convert_lit_checkpoint(*, checkpoint_name: str, out_dir: Path, model_name: s
             gc.collect()
         saver.save(sd)
 
+def lit_to_hf_model_config_mapping(*, checkpoint_name: str, out_dir: Path, model_name: str) -> None:
+    lit_config_dict = asdict(Config.from_name(model_name))
+    hf_config_dict = {'model_type': 'llama'}
+    for k, v in lit_config_dict.items():
+        if k == "padded_vocab_size":
+            hf_config_dict["vocab_size"] = v
+        elif k == "n_embd":
+            hf_config_dict["hidden_size"] = v
+        elif k == "n_layer":
+            hf_config_dict["num_hidden_layers"] = v
+        elif k == "n_head":
+            hf_config_dict["num_attention_heads"] = v
+        elif k == "n_query_groups":
+            hf_config_dict["num_key_value_heads"] = v
+        elif k == 'bias':
+            hf_config_dict['attention_bias'] = v
+        elif k == 'org':
+            continue
+        else:
+            hf_config_dict[k] = v
+    
+    hf_config_dict['max_position_embeddings'] = hf_config_dict['block_size']
+    hf_config_dict['tie_word_embeddings'] = False
+    config_path = out_dir / "config.json"
+    with open(config_path, "w") as f:
+        json.dump(hf_config_dict, f, indent=4)
+
 
 if __name__ == "__main__":
     from jsonargparse import CLI
 
     CLI(convert_lit_checkpoint, as_positional=False)
+    CLI(lit_to_hf_model_config_mapping, as_positional=False)
