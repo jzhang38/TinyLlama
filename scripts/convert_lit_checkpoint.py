@@ -229,6 +229,47 @@ def check_conversion_supported(lit_weights: Dict[str, torch.Tensor]) -> None:
         raise NotImplementedError("Converting models finetuned with adapter not yet supported.")
 
 
+def lit_to_hf_model_config_mapping(model_name: str) -> dict:
+    lit_config_dict = asdict(Config.from_name(model_name))
+    lit_hf_mapping = {
+        "block_size": "max_position_embeddings",
+        "vocab_size": "vocab_size",
+        "n_layer": "num_hidden_layers",
+        "n_embd": "hidden_size",
+        "n_head": "num_attention_heads",
+        "n_query_groups": "num_key_value_heads",
+        "intermediate_size": "intermediate_size",
+        "norm_eps": "rms_norm_eps",
+
+    }
+    hf_config_dict = {
+        "architectures": ["LlamaForCausalLM"],
+        "bos_token_id": 1,
+        "eos_token_id": 2,
+        "hidden_act": "silu",
+        "hidden_size": None,
+        "initializer_range": 0.02,
+        "intermediate_size": None,
+        "max_position_embeddings": None,
+        "model_type": "llama",
+        "num_attention_heads": None,
+        "num_hidden_layers": None,
+        "num_key_value_heads": None,
+        "pretraining_tp": 1,
+        "rms_norm_eps": None,
+        "rope_scaling": None,
+        "tie_word_embeddings": False,
+        "torch_dtype": "float32",
+        "transformers_version": "4.31.0.dev0",
+        "use_cache": True,
+        "vocab_size": None,
+    }
+    
+    for lit_key, hf_key in lit_hf_mapping.items():
+        hf_config_dict[hf_key] = lit_config_dict[lit_key]
+    return hf_config_dict
+
+
 @torch.inference_mode()
 def convert_lit_checkpoint(*, checkpoint_name: str, out_dir: Path, model_name: str) -> None:
     config = Config.from_name(model_name)
@@ -258,36 +299,16 @@ def convert_lit_checkpoint(*, checkpoint_name: str, out_dir: Path, model_name: s
             gc.collect()
         saver.save(sd)
 
-def lit_to_hf_model_config_mapping(*, checkpoint_name: str, out_dir: Path, model_name: str) -> None:
-    lit_config_dict = asdict(Config.from_name(model_name))
-    hf_config_dict = {'model_type': 'llama'}
-    for k, v in lit_config_dict.items():
-        if k == "padded_vocab_size":
-            hf_config_dict["vocab_size"] = v
-        elif k == "n_embd":
-            hf_config_dict["hidden_size"] = v
-        elif k == "n_layer":
-            hf_config_dict["num_hidden_layers"] = v
-        elif k == "n_head":
-            hf_config_dict["num_attention_heads"] = v
-        elif k == "n_query_groups":
-            hf_config_dict["num_key_value_heads"] = v
-        elif k == 'bias':
-            hf_config_dict['attention_bias'] = v
-        elif k == 'org':
-            continue
-        else:
-            hf_config_dict[k] = v
-    
-    hf_config_dict['max_position_embeddings'] = hf_config_dict['block_size']
-    hf_config_dict['tie_word_embeddings'] = False
+    # convert lit config file to hf-style
+    hf_config = lit_to_hf_model_config_mapping(model_name)
     config_path = out_dir / "config.json"
     with open(config_path, "w") as f:
-        json.dump(hf_config_dict, f, indent=4)
+        json.dump(hf_config, f, indent=4)
+
+
 
 
 if __name__ == "__main__":
     from jsonargparse import CLI
 
     CLI(convert_lit_checkpoint, as_positional=False)
-    CLI(lit_to_hf_model_config_mapping, as_positional=False)
