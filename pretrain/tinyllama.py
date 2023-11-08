@@ -132,7 +132,7 @@ def main(fabric, train_data_dir, val_data_dir, resume):
 
     fabric.print(f"Loading model with {config.__dict__}")
     t0 = time.perf_counter()
-    with fabric.init_module(empty_init=True):
+    with fabric.init_module(empty_init=(fabric.world_size > 1)):
         model = GPT(config)
         model.apply(partial(model._init_weights ,n_layer=config.n_layer))
  
