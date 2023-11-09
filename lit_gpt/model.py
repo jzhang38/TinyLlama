@@ -40,20 +40,18 @@ class GPT(nn.Module):
     def _init_weights(self, module: nn.Module, n_layer) -> None:
         """Meant to be used with `gpt.apply(gpt._init_weights)`."""
         # GPT-NeoX  https://arxiv.org/pdf/2204.06745.pdf
-        # print module name
         if isinstance(module, nn.Embedding):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=math.sqrt(2.0 / 5 / self.config.n_embd))
             # RWKV: set it to 1e-4
-            torch.nn.init.normal_(module.weight, mean=0.0, std=math.sqrt(2.0 / 5 / module.weight.size(1)))
-            # torch.nn.init.normal_(module.weight,  -1e-4, 1e-4)
+            # torch.nn.init.uniform_(module.weight,  -1e-4, 1e-4)
         elif isinstance(module, nn.Linear):
-            # fan-in variance scaling intializer
-            torch.nn.init.normal_(module.weight, mean=0.0, std=math.sqrt(2.0 / 5 / module.weight.size(1)))
+            torch.nn.init.normal_(module.weight, mean=0.0, std=math.sqrt(2.0 / 5 / self.config.n_embd))
             if module.bias is not None:
                 torch.nn.init.zeros_(module.bias)
         # GPT-NeoX       
         for name, p in module.named_parameters():
-            if (name == "proj.weight" and isinstance(module, LLaMAMLP)) or (name == "w3.weight" and isinstance(module, SwiGLU)):  #if use xformer swiglu, fc2 layer will be renamed to w3
-                nn.init.normal_(p, mean=0.0, std=1 / math.sqrt(p.shape[-1])  /  n_layer)
+            if (name == "proj.weight" and isinstance(module, LLaMAMLP)) or (name == "w3.weight" and isinstance(module, SwiGLU) or (name=="proj.weight" and isinstance(module, CausalSelfAttention))):  #if use xformer swiglu, fc2 layer will be renamed to w3
+                nn.init.normal_(p, mean=0.0, std=1 / math.sqrt(self.config.n_embd)  /  n_layer)
         
 
     def reset_cache(self) -> None:
