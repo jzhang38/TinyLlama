@@ -1,6 +1,6 @@
 ## How to fine-tune TinyLlama?
 
-step 1: Download base model weights from Huggingface and convert them into Lit-GPT format
+- step 1: Download base model weights from Huggingface and convert them into Lit-GPT format
 
 ```bash
 python scripts/download.py \
