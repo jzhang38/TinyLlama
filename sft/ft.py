@@ -183,45 +183,9 @@ def train(
                 f" {(t1 - iter_t0) * 1000:.2f}ms{' (optimizer.step)' if not is_accumulating else ''}"
             )
 
-        # if not is_accumulating and step_count % eval_interval == 0:
-        #     t0 = time.perf_counter()
-        #     val_loss = validate(fabric, model, val_data, tokenizer, max_iters=eval_iters)
-        #     t1 = time.perf_counter() - t0
-        #     fabric.print(f"step {iter_num}: val loss {val_loss.item():.4f}, val time: {t1 * 1000:.2f}ms")
-        #     fabric.barrier()
         if not is_accumulating and step_count % save_interval == 0:
             checkpoint_path = out_dir / f"iter-{iter_num:06d}-ckpt.pth"
             save_checkpoint(fabric, model, checkpoint_path)
-
-
-# FSDP has issues with `inference_mode`
-# @torch.no_grad()
-# def validate(fabric: L.Fabric, model: GPT, val_data: List[Dict], tokenizer: Tokenizer, max_iters: int) -> torch.Tensor:
-#     fabric.print("Validating ...")
-#     model.eval()
-#     losses = torch.zeros(max_iters)
-#     for k in range(max_iters):
-#         input_ids, targets = get_batch(fabric, val_data)
-#         logits = model(input_ids)
-#         losses[k] = chunked_cross_entropy(logits[..., :-1, :], targets[..., 1:], chunk_size=0)
-#     val_loss = losses.mean()
-
-#     # produce an example:
-#     instruction = "Recommend a movie for me to watch during the weekend and explain the reason."
-#     fabric.print(instruction)
-#     sample = {"instruction": instruction, "input": ""}
-#     prompt = generate_prompt(sample)
-#     encoded = tokenizer.encode(prompt, device=fabric.device)
-#     with fabric.init_tensor():
-#        # do not set `max_seq_length=max_returned_token` because memory is not a concern here
-#        model.set_kv_cache(batch_size=1)
-#     output = generate(model, encoded, max_returned_tokens=len(encoded) + eval_max_new_tokens, temperature=0.8)
-#     model.clear_kv_cache()
-#     output = tokenizer.decode(output)
-#     fabric.print(output)
-
-#     model.train()
-#     return val_loss
 
 
 def get_batch(

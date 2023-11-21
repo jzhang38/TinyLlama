@@ -45,22 +45,11 @@ def prepare(
     df = pd.read_csv(csv_path, dtype=str).fillna("")
     if not (df.columns.values == COLUMNS).all():
         raise ValueError(f"CSV columns must be {COLUMNS}, found {df.columns.values}")
-    data = json.loads(df.to_json(orient="records", indent=4))
+    train_set = json.loads(df.to_json(orient="records", indent=4))
+    print(f"train has {len(train_set):,} samples")
 
     print("Loading tokenizer...")
     tokenizer = Tokenizer(checkpoint_dir)
-
-    # Partition the dataset into train and test
-    # train_set, test_set = random_split(
-    #     data, [1.0 - test_split_fraction, test_split_fraction], generator=torch.Generator().manual_seed(seed)
-    # )
-    # train_set, test_set = list(train_set), list(test_set)
-    train_set = data
-    import random
-    random.shuffle(train_set)
-
-    print(f"train has {len(train_set):,} samples")
-    # print(f"test has {len(test_set):,} samples")
 
     print("Processing train split ...")
     train_set = [
@@ -74,19 +63,6 @@ def prepare(
         for sample in tqdm(train_set)
     ]
     torch.save(train_set, destination_path / "train.pt")
-
-    # print("Processing test split ...")
-    # test_set = [
-    #     prepare_sample(
-    #         example=sample,
-    #         tokenizer=tokenizer,
-    #         max_length=max_seq_length,
-    #         mask_inputs=mask_inputs,
-    #         ignore_index=ignore_index,
-    #     )
-    #     for sample in tqdm(test_set)
-    # ]
-    # torch.save(test_set, destination_path / "test.pt")
 
 
 def prepare_sample(example: dict, tokenizer: Tokenizer, max_length: int, mask_inputs: bool, ignore_index: int) -> dict:
