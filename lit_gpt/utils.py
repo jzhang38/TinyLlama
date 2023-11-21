@@ -8,12 +8,15 @@ from functools import partial
 from io import BytesIO
 from pathlib import Path
 from types import MethodType
-from typing import Any, Dict, List, Mapping, Optional, Type, TypeVar, Union
+from typing import Any, Dict, List, Mapping, Optional, Type, TypeVar, Union, ContextManager
 
 import torch
 import torch.nn as nn
 import torch.utils._device
+import lightning as L
 from lightning.fabric.loggers import CSVLogger
+from lightning.fabric.strategies import FSDPStrategy
+from lightning.fabric.utilities.load import _lazy_load
 from torch.serialization import normalize_storage_type
 
 
@@ -26,6 +29,30 @@ def find_multiple(n: int, k: int) -> int:
 
 def num_parameters(module: nn.Module, requires_grad: Optional[bool] = None) -> int:
     return sum(p.numel() for p in module.parameters() if requires_grad is None or p.requires_grad == requires_grad)
+
+
+def gptq_quantization(enabled: bool = False) -> ContextManager:
+    if not enabled:
+        return nullcontext()
+
+    from lightning.fabric.plugins.precision.utils import _ClassReplacementContextManager
+
+    from quantize.gptq import ColBlockQuantizedLinear
+
+    class QuantizedLinear(ColBlockQuantizedLinear):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, bits=4, tile_cols=-1, **kwargs)
+
+    return _ClassReplacementContextManager({"torch.nn.Linear": QuantizedLinear})
+
+
+def load_checkpoint(fabric: L.Fabric, model: nn.Module, checkpoint_path: Path, strict: bool = True) -> None:
+    if isinstance(fabric.strategy, FSDPStrategy):
+        fabric.load_raw(checkpoint_path, model, strict=strict)
+    else:
+        state_dict = _lazy_load(checkpoint_path)
+        state_dict = state_dict.get("model", state_dict)
+        model.load_state_dict(state_dict, strict=strict)
 
 
 @contextmanager
