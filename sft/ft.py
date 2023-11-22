@@ -24,8 +24,7 @@ from lit_gpt.utils import (
     load_checkpoint,
     num_parameters,
 )
-# from scripts.prepare_alpaca import generate_prompt
-from scripts.prepare_dolly import generate_prompt
+
 from tqdm import tqdm
 
 eval_interval = 600
@@ -92,7 +91,6 @@ def main(
         os.makedirs(out_dir, exist_ok=True)
 
     train_data = torch.load(data_dir / "train.pt")
-    val_data = torch.load(data_dir / "test.pt")
 
     if model_name is None:
         model_name = checkpoint_dir.name
@@ -113,7 +111,7 @@ def main(
     fabric.seed_everything(1337 + fabric.global_rank)
 
     train_time = time.perf_counter()
-    train(fabric, model, optimizer, train_data, val_data, checkpoint_dir, out_dir)
+    train(fabric, model, optimizer, train_data, checkpoint_dir, out_dir)
     fabric.print(f"Training time: {(time.perf_counter()-train_time):.2f}s")
     if fabric.device.type == "cuda":
         fabric.print(f"Memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB")
@@ -128,7 +126,6 @@ def train(
     model: GPT,
     optimizer: torch.optim.Optimizer,
     train_data: List[Dict],
-    val_data: List[Dict],
     checkpoint_dir: Path,
     out_dir: Path,
 ) -> None:
@@ -157,7 +154,6 @@ def train(
         iter_t0 = time.perf_counter()
 
         input_ids, targets = get_batch(fabric, train_data, longest_seq_ix if iter_num == 1 else None)
-
         is_accumulating = iter_num % gradient_accumulation_iters != 0
         with fabric.no_backward_sync(model, enabled=is_accumulating):
             logits = model(input_ids)

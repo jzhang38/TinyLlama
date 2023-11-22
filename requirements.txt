@@ -10,7 +10,7 @@ zstd
 
 # for finetuning
 bitsandbytes==0.40.0
-transformers==4.31.0
+transformers==4.35.2
 peft==0.4.0
 accelerate==0.21.0
 einops==0.6.1

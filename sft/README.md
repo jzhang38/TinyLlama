@@ -16,12 +16,12 @@ python scripts/convert_hf_checkpoint.py \
 - step 2: Prepare fine-tuning dataset (Now only support OpenAssistant)
 
 ```bash
-# Download dataset from Huggingface and convert it into csv format
-python scripts/convert_hf_dataset_to_csv.py
+# Download dataset from Huggingface and convert it into json format
+python scripts/convert_hf_dataset_to_json.py
 ```
 ```bash
-python scripts/prepare_csv.py \
-  --csv_path data/raw_csv/open_assistant.csv \
+python scripts/tokenize_dataset_json.py \
+  --json_path data/raw_json/open_assistant.json \
   --destination_path data/open_assistant \
   --checkpoint_dir checkpoints/TinyLlama/TinyLlama-1.1B-intermediate-step-955k-token-2T \
   --max_seq_length 512
@@ -34,5 +34,5 @@ python sft/ft.py \
   --data_dir data/open_assistant \
   --model_name tiny_LLaMA_1b \
   --checkpoint_dir checkpoints/TinyLlama/TinyLlama-1.1B-intermediate-step-955k-token-2T \
-  --out_dir out/oasst/ \
+  --out_dir out/oasst/ 
 ```
