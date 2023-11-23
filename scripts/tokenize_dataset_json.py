@@ -36,8 +36,10 @@ def prepare(
 
     destination_path.mkdir(parents=True, exist_ok=True)
     print("Loading json...")
+    train_set = []
     with open(json_path, 'r') as file:
-        train_set = json.load(file)
+        for line in file:
+            train_set.append(json.loads(line))
     print(f"FT dataset has {len(train_set)} samples")
 
     tokenizer = AutoTokenizer.from_pretrained(str(checkpoint_dir))
