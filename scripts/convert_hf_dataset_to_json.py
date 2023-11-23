@@ -67,9 +67,9 @@ def process_tulu_v2():
     return new_dataset
 
 
-def setup(dataset: str = 'oasst'):
+def setup(dataset: str = 'open_assistant'):
 
-    if dataset == 'oasst': data_lst = process_oasst1_top1_2023()
+    if dataset == 'open_assistant': data_lst = process_oasst1_top1_2023()
     elif dataset == 'slim_orca': data_lst = process_slim_orca()
     elif dataset == 'tulu-v2': data_lst = process_tulu_v2()
     else: raise NotImplementedError

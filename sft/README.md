@@ -17,7 +17,7 @@ python scripts/convert_hf_checkpoint.py \
 
 ```bash
 # Download dataset from Huggingface and convert it into json format
-python scripts/convert_hf_dataset_to_json.py
+python scripts/convert_hf_dataset_to_json.py --dataset open_assistant
 ```
 ```bash
 python scripts/tokenize_dataset_json.py \
