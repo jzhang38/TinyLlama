@@ -5,6 +5,7 @@ __pycache__
 build
 .venv
 .vscode
+sftp-*
 
 # data
 data
