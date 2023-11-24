@@ -162,11 +162,11 @@ If you find our work valuable, please cite:
 
 ```
 @online{tinyllama,
-  author    = {Peiyuan Zhang, Guangtao Zeng, Tianduo Wang, Wei Lu},
+  author    = {Peiyuan Zhang, Guangtao Zeng, Tianduo Wang and Wei Lu},
   title     = {TinyLlama},
   url       = {https://github.com/jzhang38/TinyLlama},
   year      = {2023},
-  month     = {Sep},
+  month     = {Sep}
 }
 ```
 
