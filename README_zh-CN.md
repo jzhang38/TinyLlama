@@ -165,11 +165,11 @@ TinyLlama是一个相对较小的模型, 同时我们用了GQA, 这意味着它�
 
 ```
 @online{tinyllama,
-  author    = {Peiyuan Zhang, Guangtao Zeng, Tianduo Wang, Wei Lu},
+  author    = {Peiyuan Zhang, Guangtao Zeng, Tianduo Wang and Wei Lu},
   title     = {TinyLlama},
   url       = {https://github.com/jzhang38/TinyLlama},
   year      = {2023},
-  month     = {Sep},
+  month     = {Sep}
 }
 ```
 
