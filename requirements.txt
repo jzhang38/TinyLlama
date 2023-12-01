@@ -1,5 +1,4 @@
-torch>=2.1.0dev
-lightning@git+https://github.com/Lightning-AI/lightning@master
+lightning @ git+https://github.com/Lightning-AI/lightning@6cbe9ceb560d798892bdae9186291acf9bf5d2e3
 jsonargparse[signatures]  # CLI
 pandas
 pyarrow
@@ -7,6 +6,7 @@ tokenizers
 sentencepiece
 wandb
 zstd
+pyyaml
 
 # for finetuning
 bitsandbytes==0.40.0
@@ -18,11 +18,3 @@ evaluate==0.4.0
 scikit-learn==1.2.2
 sentencepiece==0.1.99
 wandb==0.15.3
-# other optional dependencies are
-# sentencepiece  # pythia, falcon, redpajama
-# tokenizers  #  llama-based models
-# bitsandbytes>=0.41.1  # quantize/bnb.py
-# scipy  # TODO: remove when https://github.com/TimDettmers/bitsandbytes/pull/525 is released
-# datasets  # quantize/gptq.py
-# zstandard  # scripts/prepare_redpajama.py
-# git+https://github.com/EleutherAI/lm-evaluation-harness.git@master  # eval

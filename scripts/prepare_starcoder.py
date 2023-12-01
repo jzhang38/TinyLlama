@@ -7,7 +7,7 @@ from typing import List
 import numpy as np
 from tqdm import tqdm
 from multiprocessing import Process, cpu_count
-
+import random
 # support running without installing as a package
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
@@ -78,6 +78,9 @@ def prepare(
     import time
     assert split == "train" #  starcoder only has train data
     filenames = glob.glob(os.path.join(source_path, "*/*.parquet"), recursive=True)
+    filenames.sort()
+    random.seed(42)
+    random.shuffle(filenames)
     # only retrain subsets that follow the prefix in filenames_subset
     if filenames_subset:
         filenames = [f for f in filenames if any([prefix in f for prefix in filenames_subset])]

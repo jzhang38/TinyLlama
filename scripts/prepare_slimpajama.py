@@ -7,7 +7,8 @@ from typing import List
 import numpy as np
 from tqdm import tqdm
 from multiprocessing import Process, cpu_count
-
+import random
+import time
 # support running without installing as a package
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
@@ -78,9 +79,10 @@ def prepare(
     split: str="train",
     percentage: float = 1.0,
 ) -> None:
-    import time
-
     filenames = glob.glob(os.path.join(source_path, slimpajama_sets[split]), recursive=True)
+    filenames.sort()
+    random.seed(42)
+    random.shuffle(filenames)
     filenames = filenames[:int(len(filenames) * percentage)]
     
     num_processes = cpu_count() 
