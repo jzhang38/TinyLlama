@@ -37,17 +37,8 @@ def setup(
     with open('tinyllama.yaml', 'r') as file:
         training_config = yaml.safe_load(file)
         training_config = SimpleNamespace(**training_config)
-
-    training_config.batch_size = training_config.global_batch_size // training_config.num_of_devices
-    training_config.gradient_accumulation_steps = training_config.batch_size // training_config.micro_batch_size
-    assert training_config.gradient_accumulation_steps > 0
-    training_config.warmup_iters = training_config.warmup_steps * training_config.gradient_accumulation_steps
-    training_config.max_iters = training_config.max_step * training_config.gradient_accumulation_steps
-    training_config.lr_decay_iters = training_config.max_iters
-    training_config.log_iter_interval = training_config.log_step_interval * training_config.gradient_accumulation_steps
-
-    logger = step_csv_logger("out", training_config.name, flush_logs_every_n_steps=training_config.log_iter_interval)
-    wandb_logger = WandbLogger()
+    logger = step_csv_logger("out", training_config.name, flush_logs_every_n_steps=training_config.log_step_interval * training_config.gradient_accumulation_steps)
+    wandb_logger = WandbLogger(name=training_config.name)
     if devices > 1:
         strategy = FSDPStrategy(
             auto_wrap_policy={Block},
@@ -60,21 +51,30 @@ def setup(
         strategy = "auto"
     fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=[logger, wandb_logger])
     fabric.print(training_config)
+    if fabric.global_rank == 0:
+        os.makedirs(training_config.out_dir,  exist_ok=True)
+        # save training_config to out_dir
+        with open(training_config.out_dir+ '/training_config.yaml', 'w') as file:
+            yaml.dump(vars(training_config), file)
+            
+    training_config.batch_size = training_config.global_batch_size // training_config.num_of_devices
+    training_config.gradient_accumulation_steps = training_config.batch_size // training_config.micro_batch_size
+    assert training_config.gradient_accumulation_steps > 0
+    training_config.warmup_iters = training_config.warmup_steps * training_config.gradient_accumulation_steps
+    training_config.max_iters = training_config.max_step * training_config.gradient_accumulation_steps
+    training_config.lr_decay_iters = training_config.max_iters
+    training_config.log_iter_interval = training_config.log_step_interval * training_config.gradient_accumulation_steps
+    training_config.out_dir = "out/" + training_config.name
+    training_config.out_dir = Path(training_config.out_dir)
+    training_config.pretrained_path = Path(training_config.pretrained_path)
+    training_config.train_data_dir = Path(training_config.train_data_dir)
+    training_config.val_data_dir = Path(training_config.val_data_dir)
     #fabric.launch(main, train_data_dir, val_data_dir, resume)
     main(fabric, training_config)
 
 def main(fabric, training_config):
     monitor = Monitor(fabric, window_size=2, time_unit="seconds", log_iter_interval=training_config.log_iter_interval)
 
-    if fabric.global_rank == 0:
-        os.makedirs(training_config.out_dir,  exist_ok=True)
-        # save training_config to out_dir
-        with open(training_config.out_dir+ '/training_config.yaml', 'w') as file:
-            yaml.dump(vars(training_config), file)
-    training_config.out_dir = Path(training_config.out_dir)
-    training_config.pretrained_path = Path(training_config.pretrained_path)
-    training_config.train_data_dir = Path(training_config.train_data_dir)
-    training_config.val_data_dir = Path(training_config.val_data_dir)
     config = Config.from_name(training_config.model_name)
 
     train_dataloader, val_dataloader = create_dataloaders(
@@ -163,7 +163,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             break
         
         # determine and set the learning rate for this iteration
-        lr = get_cosine_lr(state["iter_num"], training_config) if training_config.decay_lr else training_config.learning_rate
+        lr = get_cosine_lr(state["iter_num"], training_config)
         for param_group in optimizer.param_groups:
             param_group["lr"] = lr
 
