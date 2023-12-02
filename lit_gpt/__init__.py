@@ -1,7 +1,6 @@
 from lit_gpt.model import GPT
 from lit_gpt.config import Config
 from lit_gpt.tokenizer import Tokenizer
-from lit_gpt.fused_cross_entropy import FusedCrossEntropyLoss
 from lightning_utilities.core.imports import RequirementCache
 
 if not bool(RequirementCache("torch>=2.1.0dev")):

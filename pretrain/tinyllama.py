@@ -21,7 +21,7 @@ from lit_gpt.speed_monitor import SpeedMonitorFabric as Monitor
 from lit_gpt.speed_monitor import estimate_flops
 from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, num_parameters, step_csv_logger
 from pytorch_lightning.loggers import WandbLogger
-from lit_gpt import FusedCrossEntropyLoss
+from lit_gpt.fused_cross_entropy import FusedCrossEntropyLoss
 import random
 import yaml
 from types import SimpleNamespace
