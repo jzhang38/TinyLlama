@@ -62,8 +62,6 @@ def prepare_full(
         with zstd.open(open(filepath, "rb"), "rt", encoding="utf-8") as f:
             for row in tqdm(f):
                 text = json.loads(row)["text"]
-                if json.loads(row)["meta"]["redpajama_set_name"] == "RedPajamaGithub":
-                    continue # we don't want to include the github data
                 text_ids = tokenizer.encode(text)
                 builder.add_array(np.array(text_ids, dtype=builder.dtype))
 
@@ -84,10 +82,8 @@ def prepare(
     random.seed(42)
     random.shuffle(filenames)
     filenames = filenames[:int(len(filenames) * percentage)]
-    
-    num_processes = cpu_count() 
+    num_processes = 64 # Changing this may damage reproducibility
     chunked_filenames = np.array_split(filenames, num_processes)
-
     processes = []
     start_time = time.time()
 

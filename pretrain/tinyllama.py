@@ -26,29 +26,28 @@ import random
 import yaml
 from types import SimpleNamespace
 
-with open('tinyllama.yaml', 'r') as file:
-    training_config = yaml.safe_load(file)
-    training_config = SimpleNamespace(**training_config)
-
-
-training_config.batch_size = training_config.global_batch_size // training_config.num_of_devices
-training_config.gradient_accumulation_steps = training_config.batch_size // training_config.micro_batch_size
-assert training_config.gradient_accumulation_steps > 0
-warmup_iters = training_config.warmup_steps * training_config.gradient_accumulation_steps
-training_config.max_iters = training_config.max_step * training_config.gradient_accumulation_steps
-training_config.lr_decay_iters = training_config.max_iters
-training_config.log_iter_interval = training_config.log_step_interval * training_config.gradient_accumulation_steps
-
-
-logger = step_csv_logger("out", training_config.name, flush_logs_every_n_steps=training_config.log_iter_interval)
-wandb_logger = WandbLogger()
 
 
 def setup(
     devices: int = 8,
+    training_config: str = "experiments/tinyllama.yaml"
 ) -> None:
     precision = get_default_supported_precision(training=True)
 
+    with open('tinyllama.yaml', 'r') as file:
+        training_config = yaml.safe_load(file)
+        training_config = SimpleNamespace(**training_config)
+
+    training_config.batch_size = training_config.global_batch_size // training_config.num_of_devices
+    training_config.gradient_accumulation_steps = training_config.batch_size // training_config.micro_batch_size
+    assert training_config.gradient_accumulation_steps > 0
+    training_config.warmup_iters = training_config.warmup_steps * training_config.gradient_accumulation_steps
+    training_config.max_iters = training_config.max_step * training_config.gradient_accumulation_steps
+    training_config.lr_decay_iters = training_config.max_iters
+    training_config.log_iter_interval = training_config.log_step_interval * training_config.gradient_accumulation_steps
+
+    logger = step_csv_logger("out", training_config.name, flush_logs_every_n_steps=training_config.log_iter_interval)
+    wandb_logger = WandbLogger()
     if devices > 1:
         strategy = FSDPStrategy(
             auto_wrap_policy={Block},
@@ -62,9 +61,9 @@ def setup(
     fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=[logger, wandb_logger])
     fabric.print(training_config)
     #fabric.launch(main, train_data_dir, val_data_dir, resume)
-    main(fabric)
+    main(fabric, training_config)
 
-def main(fabric):
+def main(fabric, training_config):
     monitor = Monitor(fabric, window_size=2, time_unit="seconds", log_iter_interval=training_config.log_iter_interval)
 
     if fabric.global_rank == 0:
@@ -79,7 +78,7 @@ def main(fabric):
     config = Config.from_name(training_config.model_name)
 
     train_dataloader, val_dataloader = create_dataloaders(
-        fabric=fabric,
+        fabric=fabric, training_config=training_config
     )
     if val_dataloader is None:
         train_dataloader = fabric.setup_dataloaders(train_dataloader)
@@ -108,26 +107,24 @@ def main(fabric):
     state = {"model": model, "optimizer": optimizer,  "iter_num": 0, "step_count": 0}
 
     if training_config.resume is True:
-        resume_path = sorted(training_config.out_dir.glob("*.pth"))[-1]
-    else:
-        resume_path = training_config.resume
+        training_config = sorted(training_config.out_dir.glob("*.pth"))[-1]
     if training_config.resume :
-        fabric.print(f"Resuming training from {resume_path}")
-        fabric.load(resume_path, state)
+        fabric.print(f"Resuming training from {training_config}")
+        fabric.load(training_config, state)
 
     train_time = time.perf_counter()
-    train(fabric, state, train_dataloader, val_dataloader, monitor, training_config.resume)
+    train(fabric, state, train_dataloader, val_dataloader, monitor, training_config)
     fabric.print(f"Training time: {(time.perf_counter()-train_time):.2f}s")
     if fabric.device.type == "cuda":
         fabric.print(f"Memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB")
 
 
-def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
+def train(fabric, state, train_dataloader, val_dataloader, monitor, training_config):
     model = state["model"]
     optimizer = state["optimizer"]
 
     if val_dataloader is not None:
-        validate(fabric, model, val_dataloader)  # sanity check
+        validate(fabric, model, val_dataloader, training_config)  # sanity check
 
     with torch.device("meta"):
         meta_model = GPT(model.config)
@@ -153,12 +150,12 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
     loss_func = FusedCrossEntropyLoss()
     for  train_data in train_dataloader:
         # resume loader state. This is not elegant but it works. Should rewrite it in the future.
-        if resume:
+        if training_config.resume:
             if curr_iter < initial_iter:
                 curr_iter += 1
                 continue
             else:
-                resume = False
+                training_config.resume = False
                 curr_iter = -1
                 fabric.barrier()
                 fabric.print("resume finished, taken {} seconds".format(time.perf_counter() - total_t0))
@@ -166,7 +163,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
             break
         
         # determine and set the learning rate for this iteration
-        lr = get_cosine_lr(state["iter_num"]) if training_config.decay_lr else training_config.learning_rate
+        lr = get_cosine_lr(state["iter_num"], training_config) if training_config.decay_lr else training_config.learning_rate
         for param_group in optimizer.param_groups:
             param_group["lr"] = lr
 
@@ -215,7 +212,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
         if val_dataloader is not None and not is_accumulating and state["step_count"] % training_config.eval_step_interval == 0:
             
             t0 = time.perf_counter()
-            val_loss = validate(fabric, model, val_dataloader)
+            val_loss = validate(fabric, model, val_dataloader, training_config)
             t1 = time.perf_counter() - t0
             monitor.eval_end(t1)
             fabric.print(f"step {state['iter_num']}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms")
@@ -229,7 +226,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
 
         
 @torch.no_grad()
-def validate(fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoader) -> torch.Tensor:
+def validate(fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoader, training_config) -> torch.Tensor:
     fabric.print("Validating ...")
     model.eval()
 
@@ -253,7 +250,7 @@ def validate(fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoade
 
 
 def create_dataloader(
-    block_size: int, fabric, shuffle: bool = True, split="train"
+    training_config, block_size: int, fabric, shuffle: bool = True, split="train"
 ) -> DataLoader:
     datasets = []
     data_config = training_config.train_data_config if split == "train" else training_config.val_data_config
@@ -291,11 +288,12 @@ def create_dataloader(
 
 
 def create_dataloaders(
-    fabric,
+    fabric, training_config
 ) -> Tuple[DataLoader, DataLoader]:
     # Increase by one because we need the next word as well
     effective_block_size = training_config.block_size + 1
     train_dataloader = create_dataloader(
+        training_config=training_config,
         block_size=effective_block_size,
         fabric=fabric,
         shuffle=True,
@@ -303,6 +301,7 @@ def create_dataloaders(
     )
     val_dataloader = (
         create_dataloader(
+            training_config=training_config,
             block_size=effective_block_size,
             fabric=fabric,
             shuffle=False,
@@ -315,15 +314,15 @@ def create_dataloaders(
 
 
 # learning rate decay scheduler (cosine with warmup)
-def get_cosine_lr(it):
+def get_cosine_lr(it, training_config):
     # 1) linear warmup for warmup_iters steps
-    if it < warmup_iters:
-        return training_config.learning_rate * it / warmup_iters
+    if it < training_config.warmup_iters:
+        return training_config.learning_rate * it / training_config.warmup_iters
     # 2) if it > lr_decay_iters, return min learning rate
     if it > training_config.lr_decay_iters:
         return training_config.min_lr
     # 3) in between, use cosine decay down to min learning rate
-    decay_ratio = (it - warmup_iters) / (training_config.lr_decay_iters - warmup_iters)
+    decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters)
     assert 0 <= decay_ratio <= 1
     coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
     return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
