@@ -18,7 +18,7 @@ sys.path.append(str(wd))
 from lit_gpt.model import GPT, Block, Config
 from lit_gpt.packed_dataset import CombinedDataset, PackedDataset
 from lit_gpt.speed_monitor import SpeedMonitorFabric as Monitor
-from lit_gpt.speed_monitor import estimate_flops, measure_flops
+from lit_gpt.speed_monitor import estimate_flops
 from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, num_parameters, step_csv_logger
 from pytorch_lightning.loggers import WandbLogger
 from lit_gpt import FusedCrossEntropyLoss
@@ -41,7 +41,7 @@ def setup(
     if training_config.num_of_devices > 1:
         strategy = FSDPStrategy(
             auto_wrap_policy={Block},
-            activation_checkpointing_policy=None,
+            activation_checkpointing_policy={Block} if training_config.use_activation_checkpoint else None,
             sharding_strategy="SHARD_GRAD_OP",
             state_dict_type="full",
             limit_all_gathers=True,

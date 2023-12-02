@@ -1,0 +1,38 @@
+model_name: "llama_700M"
+name: "llama_700M_lr_2.5e-4_bs_0.5M_step_32K"
+
+# Training Config
+global_batch_size: 256
+learning_rate: 0.00025
+min_lr: 0.000025
+micro_batch_size: 8
+max_step: 32000
+use_activation_checkpoint: True
+
+# Logging 
+log_step_interval: 10
+eval_iters: 32 # Essentially evaluating on 0.5M tokens
+
+# Fixed Hyperparam
+weight_decay: 0.1
+beta1: 0.9
+beta2: 0.95
+grad_clip: 1.0
+warmup_steps: 200
+num_of_devices: 8
+
+# Data
+train_data_dir:  data/SP_tokenized
+val_data_dir: data/SP_tokenized
+train_data_config:
+  - - "train_slim"
+    - 1.0
+val_data_config:
+  - - "validation"
+    - 1.0
+seed: 3407
+
+# Resume
+resume: false
+pretrained_path: None
+

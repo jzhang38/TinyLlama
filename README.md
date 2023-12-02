@@ -3,11 +3,11 @@
 ### Installation
 This code base is tested on RTX4090/A100 with CUDA 11.8 installed.
 
-#### Install Pytorch and Xformers
+#### Install Pytorch
 ```bash
-pip3 install -U xformers --index-url https://download.pytorch.org/whl/cu118
+pip3 install torch --index-url https://download.pytorch.org/whl/cu118
 ```
-(Xformers will automatically install PyTorch)
+
 
 #### Install Flash-Attention 2 and other fused operators:
 ```bash
@@ -25,7 +25,7 @@ cd ../.. && rm -rf flash-attention
 pip install -r requirements.txt 
 ```
 to install other dependencies.
-It may take >= 5 minutes to build xformers/flash-attention. Do not worry if the process seemly stagnant or the terminal print out many warnings.
+It may take >= 5 minutes to build flash-attention. Do not worry if the process seemly stagnant or the terminal print out many warnings.
 
 Then you are ready to go 🎉!
 
@@ -61,4 +61,19 @@ If your setup comprises two nodes, each with 8 GPUs, you can initiate pretrainin
 On node 1:
 ```
 python pretrain/tinyllama.py --training_config XXX.yaml
+```
+
+### Evaluation
+Below command generate HF weight and config.json.
+```
+python scripts/convert_hf_checkpoint.py --checkpoint_dir out/llama_19M_lr_1e-3_bs_0.5M_step_16K --model_name  llama_19M
+```
+The remaining files is exactly the same as Llama-2-7B(https://huggingface.co/meta-llama/Llama-2-7b).
+To run eval, clone [lm-eval-harness](https://github.com/EleutherAI/lm-evaluation-harness) and run:
+```
+python main.py \
+    --model hf-causal \
+    --model_args pretrained=PATH,dtype="float" \
+    --tasks openbookqa,winogrande,arc_easy,arc_challenge,boolq,piqa\
+    --device cuda:9 --batch_size 16
 ```

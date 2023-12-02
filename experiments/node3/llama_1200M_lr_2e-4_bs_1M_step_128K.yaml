@@ -1,16 +1,17 @@
-model_name: "llama_85M"
-name: "llama_85M_lr_6e-4_bs_0.5M_step_32K"
+model_name: "llama_1200M"
+name: "llama_1200M_lr_2e-4_bs_1M_step_128K"
 
 # Training Config
-global_batch_size: 256
-learning_rate: 0.0006
-min_lr: 0.00006
-micro_batch_size: 8
-max_step: 320000
+global_batch_size: 512
+learning_rate: 0.0002
+min_lr: 0.00002
+micro_batch_size: 4
+max_step: 128000
+use_activation_checkpoint: True
 
 # Logging 
 log_step_interval: 10
-eval_iters: 32 # Essentially evaluating on 4M tokens
+eval_iters: 64 # Essentially evaluating on 0.5M tokens
 
 # Fixed Hyperparam
 weight_decay: 0.1

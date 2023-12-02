@@ -12,7 +12,6 @@ from lightning_utilities.core.imports import RequirementCache
 from typing_extensions import Self
 from flash_attn import flash_attn_func
 from lit_gpt.config import Config
-from xformers.ops import SwiGLU
 from .fused_rotary_embedding import apply_rotary_emb_func
 RoPECache = Tuple[torch.Tensor, torch.Tensor]
 KVCache = Tuple[torch.Tensor, torch.Tensor]
@@ -50,7 +49,7 @@ class GPT(nn.Module):
                 torch.nn.init.zeros_(module.bias)
         # GPT-NeoX       
         for name, p in module.named_parameters():
-            if (name == "proj.weight" and isinstance(module, LLaMAMLP)) or (name == "w3.weight" and isinstance(module, SwiGLU) or (name=="proj.weight" and isinstance(module, CausalSelfAttention))):  #if use xformer swiglu, fc2 layer will be renamed to w3
+            if name == "proj.weight" or name=="proj.weight":  
                 nn.init.normal_(p, mean=0.0, std=1 / math.sqrt(self.config.n_embd)  /  n_layer)
         
 
@@ -306,16 +305,14 @@ class GptNeoxMLP(nn.Module):
 class LLaMAMLP(nn.Module):
     def __init__(self, config: Config) -> None:
         super().__init__()
-        # self.fc_1 = nn.Linear(config.n_embd, config.intermediate_size, bias=config.bias)
-        # self.fc_2 = nn.Linear(config.n_embd, config.intermediate_size, bias=config.bias)
-        # self.proj = nn.Linear(config.intermediate_size, config.n_embd, bias=config.bias)
-        self.swiglu = SwiGLU(config.n_embd,config.intermediate_size, bias=False, _pack_weights=False)
+        self.fc_1 = nn.Linear(config.n_embd, config.intermediate_size, bias=config.bias)
+        self.fc_2 = nn.Linear(config.n_embd, config.intermediate_size, bias=config.bias)
+        self.proj = nn.Linear(config.intermediate_size, config.n_embd, bias=config.bias)
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # x_fc_1 = self.fc_1(x)
-        # x_fc_2 = self.fc_2(x)
-        # x = torch.nn.functional.silu(x_fc_1) * x_fc_2
-        # return self.proj(x)
-        return self.swiglu(x)
+        x_fc_1 = self.fc_1(x)
+        x_fc_2 = self.fc_2(x)
+        x = torch.nn.functional.silu(x_fc_1) * x_fc_2
+        return self.proj(x)
 
 
 def build_rope_cache(
