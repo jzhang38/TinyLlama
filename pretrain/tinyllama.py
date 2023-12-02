@@ -179,7 +179,8 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             loss = loss_func(logits, targets)
             # loss = chunked_cross_entropy(logits, targets, chunk_size=0)
             fabric.backward(loss / training_config.gradient_accumulation_steps)
-
+        with torch.no_grad():
+            gathered_loss = fabric.all_reduce(loss)
         if not is_accumulating:
             fabric.clip_gradients(model, optimizer, max_norm=training_config.grad_clip)
             optimizer.step()
@@ -190,7 +191,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
         total_lengths += input_ids.size(1)
         t1 = time.perf_counter()
         fabric.print(
-                f"iter {state['iter_num']} step {state['step_count']}: loss {loss.item():.4f}, iter time:"
+                f"iter {state['iter_num']} step {state['step_count']}: loss {gathered_loss.item():.4f}, iter time:"
                 f" {(t1 - iter_t0) * 1000:.2f}ms{' (optimizer.step)' if not is_accumulating else ''}"
                 f" remaining time: {(t1 - total_t0) / (state['iter_num'] - initial_iter) * (training_config.max_iters - state['iter_num']) / 3600:.2f} hours. " 
                 # print days as well
@@ -205,7 +206,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             state["step_count"],
             flops_per_batch=estimated_flops,
             lengths=total_lengths,
-            train_loss = loss.item(),
+            train_loss = gathered_loss.item(),
             lr = lr
         )
 
@@ -245,8 +246,7 @@ def validate(fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoade
         losses[k] = loss.item()
         
     out = losses.mean()
-
-    model.train()
+    fabric.all_reduce(out)
     return out
 
 
