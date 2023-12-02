@@ -60,7 +60,5 @@ If your setup comprises two nodes, each with 8 GPUs, you can initiate pretrainin
 
 On node 1:
 ```
-lightning run model \
-    --devices=8 \
-    pretrain/tinyllama.py 
+python pretrain/tinyllama.py --training_config XXX.yaml
 ```

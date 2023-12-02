@@ -57,7 +57,8 @@ def setup(
         # save training_config to out_dir
         with open(training_config.out_dir+ '/training_config.yaml', 'w') as file:
             yaml.dump(vars(training_config), file)
-            
+    training_config.save_step_interval = training_config.max_step // 5
+    training_config.eval_step_interval = training_config.max_step // 10
     training_config.batch_size = training_config.global_batch_size // training_config.num_of_devices
     training_config.gradient_accumulation_steps = training_config.batch_size // training_config.micro_batch_size
     assert training_config.gradient_accumulation_steps > 0
@@ -107,10 +108,10 @@ def main(fabric, training_config):
     state = {"model": model, "optimizer": optimizer,  "iter_num": 0, "step_count": 0}
 
     if training_config.resume is True:
-        training_config = sorted(training_config.out_dir.glob("*.pth"))[-1]
+        training_config.resume = sorted(training_config.out_dir.glob("*.pth"))[-1]
     if training_config.resume :
-        fabric.print(f"Resuming training from {training_config}")
-        fabric.load(training_config, state)
+        fabric.print(f"Resuming training from {training_config.resume}")
+        fabric.load(training_config.resume, state)
 
     train_time = time.perf_counter()
     train(fabric, state, train_dataloader, val_dataloader, monitor, training_config)
