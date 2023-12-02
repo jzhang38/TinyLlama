@@ -1,12 +1,11 @@
 # LLM Scaling Law Made Easy
 
-### Installation
+## Installation
 This code base is tested on RTX4090 with CUDA 11.8.
 #### Install Pytorch
 ```bash
 pip3 install torch --index-url https://download.pytorch.org/whl/cu118
 ```
-
 
 #### Install Flash-Attention 2 and other fused operators:
 ```bash
@@ -23,12 +22,8 @@ cd ../.. && rm -rf flash-attention
 ```
 pip install -r requirements.txt 
 ```
-to install other dependencies.
-It may take >= 5 minutes to build flash-attention. Do not worry if the process seemly stagnant or the terminal print out many warnings.
 
-Then you are ready to go 🎉!
-
-### Data Preparation
+## Data Preparation
 You need at least 1T disk space to download data and reproduce all our experiments.
 #### Download Datasets
 Download the Slimpajama to your chosen directory. 
@@ -54,7 +49,7 @@ python scripts/prepare_slimpajama.py --source_path data/SlimPajama-627B --tokeni
 ```
 The processed training data (chunk 1 to chunk 4) has in total 275B tokens, making our experiments in the infinite data regime (no training tokens will ever been seen more than once). 
 
-### Training
+## Training
 If your setup comprises two nodes, each with 8 GPUs, you can initiate pretraining with the following commands:
 
 On node 1:
@@ -62,7 +57,7 @@ On node 1:
 python pretrain/tinyllama.py --training_config XXX.yaml
 ```
 
-### Evaluation
+## Downstream Evaluation
 Below command generate HF weight and config.json.
 ```
 python scripts/convert_lit2hf_checkpoint.py --out_dir out/llama_19M_lr_1e-3_bs_0.5M_step_16K --checkpoint_name iter-012800-ckpt.pth --model_name  llama_19M
