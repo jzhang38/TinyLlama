@@ -142,8 +142,8 @@ LLaMA = [
         name="llama_300M",
         # -----Change here------# 
         n_layer=24,
-        n_head=1024,
-        n_embd=16,
+        n_embd=1024,
+        n_head=16,
          # -----Fixed Hyperparam------# 
         rotary_percentage=1.0,
         parallel_residual=False,
@@ -157,11 +157,11 @@ LLaMA = [
     ),
     dict(
         org="StatNLP",
-        name="llama_800M",
+        name="llama_700M",
         # -----Change here------# 
-        n_layer=16,
-        n_head=2048,
-        n_embd=8,
+        n_layer=24,
+        n_embd=1536,
+        n_head=24,
          # -----Fixed Hyperparam------# 
         rotary_percentage=1.0,
         parallel_residual=False,
@@ -178,8 +178,8 @@ LLaMA = [
         name="llama_1200M",
         # -----Change here------# 
         n_layer=24,
-        n_head=2048,
-        n_embd=16,
+        n_embd=2048,
+        n_head=16,
          # -----Fixed Hyperparam------# 
         rotary_percentage=1.0,
         parallel_residual=False,

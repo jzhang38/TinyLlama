@@ -1,0 +1,37 @@
+model_name: "llama_19M"
+name: "llama_19M_lr_1e-3_bs_0.5M_step_2K"
+
+# Training Config
+global_batch_size: 256
+learning_rate: 0.001
+min_lr: 0.0001
+micro_batch_size: 16
+max_step: 2000
+
+# Logging 
+log_step_interval: 10
+eval_iters:  16 # Essentially evaluating on 4M tokens
+
+# Fixed Hyperparam
+weight_decay: 0.1
+beta1: 0.9
+beta2: 0.95
+grad_clip: 1.0
+warmup_steps: 200
+num_of_devices: 8
+
+# Data
+train_data_dir:  data/SP_tokenized
+val_data_dir: data/SP_tokenized
+train_data_config:
+  - - "train_slim"
+    - 1.0
+val_data_config:
+  - - "validation"
+    - 1.0
+seed: 3407
+
+# Resume
+resume: false
+pretrained_path: None
+

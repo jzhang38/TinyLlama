@@ -42,6 +42,7 @@ def setup(
         strategy = FSDPStrategy(
             auto_wrap_policy={Block},
             activation_checkpointing_policy=None,
+            sharding_strategy="SHARD_GRAD_OP",
             state_dict_type="full",
             limit_all_gathers=True,
             cpu_offload=False,
