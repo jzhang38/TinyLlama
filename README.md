@@ -41,7 +41,7 @@ cd ../../..
 Note that to save space, we only use chunk 1 to chunk 4 in the training set for our experiments. This operation does not lose generalizability, because SlimPajama is already shuffled.
 #### Tokenize data
 
-Use the provided scripts to tokenize the datasets and divide them into chunks.
+Use the provided scripts to tokenize the datasets.
 ```bash
 mkdir data && cd data && mkdir llama && cd llama && wget https://huggingface.co/TinyLlama/TinyLlama-1.1B-intermediate-step-480k-1T/blob/main/tokenizer.model && cd ../..
 python scripts/prepare_slimpajama.py --source_path data/SlimPajama-627B --tokenizer_path data/llama  --destination_path data/SP_tokenized --split train --percentage 1.0
