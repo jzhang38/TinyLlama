@@ -15,13 +15,13 @@ import os
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 # from apex.optimizers import FusedAdam #torch optimizer has a cuda backend, which is faster actually
-from lit_gpt.model import GPT, Block, Config
-from lit_gpt.packed_dataset import CombinedDataset, PackedDataset
-from lit_gpt.speed_monitor import SpeedMonitorFabric as Monitor
-from lit_gpt.speed_monitor import estimate_flops
-from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, num_parameters, step_csv_logger
+from src.model import GPT, Block, Config
+from src.packed_dataset import CombinedDataset, PackedDataset
+from src.speed_monitor import SpeedMonitorFabric as Monitor
+from src.speed_monitor import estimate_flops
+from src.utils import chunked_cross_entropy, get_default_supported_precision, num_parameters, step_csv_logger
 from pytorch_lightning.loggers import WandbLogger
-from lit_gpt.fused_cross_entropy import FusedCrossEntropyLoss
+from src.fused_cross_entropy import FusedCrossEntropyLoss
 import random
 import yaml
 from types import SimpleNamespace

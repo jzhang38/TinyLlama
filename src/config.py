@@ -4,8 +4,8 @@ import math
 import torch
 from typing_extensions import Self
 
-import lit_gpt.model
-from lit_gpt.utils import find_multiple
+import src.model
+from src.utils import find_multiple
 
 
 @dataclass
@@ -82,17 +82,17 @@ class Config:
     @property
     def mlp_class(self) -> Type:
         # `self._mlp_class` cannot be the type to keep the config json serializable
-        return getattr(lit_gpt.model, self._mlp_class)
+        return getattr(src.model, self._mlp_class)
 
     @property
     def norm_class(self) -> Type:
         # `self._norm_class` cannot be the type to keep the config json serializable
         if self._norm_class == "RMSNorm":
-            from lit_gpt.rmsnorm import RMSNorm
+            from src.rmsnorm import RMSNorm
 
             return RMSNorm
         elif self._norm_class == "FusedRMSNorm":
-            from lit_gpt.rmsnorm import FusedRMSNorm
+            from src.rmsnorm import FusedRMSNorm
             return FusedRMSNorm
         return getattr(torch.nn, self._norm_class)
 
