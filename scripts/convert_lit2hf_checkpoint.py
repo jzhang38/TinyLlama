@@ -47,9 +47,9 @@ def copy_weights_llama(
         "transformer.h.{}.norm_1.weight": "model.layers.{}.input_layernorm.weight",
         "transformer.h.{}.attn.proj.weight": "model.layers.{}.self_attn.o_proj.weight",
         "transformer.h.{}.norm_2.weight": "model.layers.{}.post_attention_layernorm.weight",
-        "transformer.h.{}.mlp.swiglu.w1.weight": "model.layers.{}.mlp.gate_proj.weight",
-        "transformer.h.{}.mlp.swiglu.w2.weight": "model.layers.{}.mlp.up_proj.weight",
-        "transformer.h.{}.mlp.swiglu.w3.weight": "model.layers.{}.mlp.down_proj.weight",
+        "transformer.h.{}.mlp.fc_1.weight": "model.layers.{}.mlp.gate_proj.weight",
+        "transformer.h.{}.mlp.fc_2.weight": "model.layers.{}.mlp.up_proj.weight",
+        "transformer.h.{}.mlp.proj.weight": "model.layers.{}.mlp.down_proj.weight",
         "transformer.ln_f.weight": "model.norm.weight",
         "lm_head.weight": "lm_head.weight",
     }
@@ -196,7 +196,7 @@ def convert_lit_checkpoint(*,
     checkpoint_name: str, 
     out_dir: Path, 
     model_name: str,
-    model_only: bool = True) -> None:
+    model_only: bool = False) -> None:
     config = Config.from_name(model_name)
 
 

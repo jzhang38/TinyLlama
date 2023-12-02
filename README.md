@@ -66,14 +66,14 @@ python pretrain/tinyllama.py --training_config XXX.yaml
 ### Evaluation
 Below command generate HF weight and config.json.
 ```
-python scripts/convert_hf_checkpoint.py --checkpoint_dir out/llama_19M_lr_1e-3_bs_0.5M_step_16K --model_name  llama_19M
+python scripts/convert_lit2hf_checkpoint.py --out_dir out/llama_19M_lr_1e-3_bs_0.5M_step_16K --checkpoint_name iter-012800-ckpt.pth --model_name  llama_19M
 ```
 The remaining files is exactly the same as Llama-2-7B(https://huggingface.co/meta-llama/Llama-2-7b).
 To run eval, clone [lm-eval-harness](https://github.com/EleutherAI/lm-evaluation-harness) and run:
 ```
 python main.py \
     --model hf-causal \
-    --model_args pretrained=PATH,dtype="float" \
-    --tasks openbookqa,winogrande,arc_easy,arc_challenge,boolq,piqa\
+    --model_args pretrained=/root/ScalingLaw/data/test_model,dtype="float" \
+    --tasks lambada_openai\
     --device cuda:9 --batch_size 16
 ```
