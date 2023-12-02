@@ -11,7 +11,7 @@ from src.utils import find_multiple
 @dataclass
 class Config:
     org: str = "Lightning-AI"
-    name: str = "lit-GPT"
+    name: str = "tinyllama"
     block_size: int = 4096
     vocab_size: int = 50254
     padding_multiple: int = 512

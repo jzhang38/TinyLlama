@@ -1,8 +1,7 @@
 # LLM Scaling Law Made Easy
 
 ### Installation
-This code base is tested on RTX4090/A100 with CUDA 11.8 installed.
-
+This code base is tested on RTX4090 with CUDA 11.8.
 #### Install Pytorch
 ```bash
 pip3 install torch --index-url https://download.pytorch.org/whl/cu118
@@ -14,7 +13,7 @@ pip3 install torch --index-url https://download.pytorch.org/whl/cu118
 pip uninstall ninja -y && pip install ninja -U
 git clone https://github.com/Dao-AILab/flash-attention
 cd flash-attention
-python setup.py install
+pip install flash-attn --no-build-isolation
 cd csrc/rotary && pip install .
 cd ../layer_norm && pip install .
 cd ../xentropy && pip install .
