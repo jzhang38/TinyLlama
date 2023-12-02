@@ -204,7 +204,8 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             state["step_count"],
             flops_per_batch=estimated_flops,
             lengths=total_lengths,
-            train_loss = loss.item()
+            train_loss = loss.item(),
+            lr = lr
         )
 
             

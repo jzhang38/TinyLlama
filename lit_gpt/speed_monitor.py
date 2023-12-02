@@ -225,6 +225,7 @@ class SpeedMonitorBase:
         flops_per_batch: Optional[int] = None,  # (per device)
         lengths: Optional[int] = None,  # total length of the samples seen (per device)
         train_loss: Optional[float] = None,
+        lr = None,
     ):
         self.iter += 1
         metrics = {}
@@ -269,6 +270,7 @@ class SpeedMonitorBase:
                         }
                     )
 
+
         if flops_per_batch is not None:
             # sum of flops per batch across ranks
             self.history_flops.append(flops_per_batch * world_size)
@@ -289,6 +291,7 @@ class SpeedMonitorBase:
                 "time/val": self.total_eval_wct / self.divider,
                 "time/total": (train_elapsed + self.total_eval_wct) / self.divider,
                 "samples": samples,
+                "lr": lr,
             }
         )
         if self.iter % self.log_iter_interval == 0:
