@@ -1,5 +1,5 @@
 model_name: "llama_19M"
-name: "llama_19M_lr_1e-3_bs_0.5M_step_1000"
+name: "llama_19M_lr_1e-3_bs_0.5M_step_8000"
 
 # Training Config
 global_batch_size: 256
@@ -7,8 +7,7 @@ learning_rate: 0.001
 min_lr: 0.0001
 micro_batch_size: 16
 num_of_devices: 8
-max_step: 1000
-warmup_steps: 8000
+max_step: 8000
 
 # Logging 
 log_step_interval: 10
@@ -19,6 +18,7 @@ weight_decay: 0.1
 beta1: 0.9
 beta2: 0.95
 grad_clip: 1.0
+warmup_steps: 200
 
 # Data
 train_data_dir:  data/SP_tokenized
