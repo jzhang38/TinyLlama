@@ -58,8 +58,8 @@ def setup(
         # save training_config to out_dir
         with open(training_config.out_dir+ '/training_config.yaml', 'w') as file:
             yaml.dump(vars(training_config), file)
-    training_config.save_step_interval = training_config.max_step // 5
-    training_config.eval_step_interval = training_config.max_step // 10
+    training_config.save_step_list = get_eval_step(training_config.max_step)
+    training_config.eval_step_list = get_eval_step(training_config.max_step)
     training_config.batch_size = training_config.global_batch_size // training_config.num_of_devices
     training_config.gradient_accumulation_steps = training_config.batch_size // training_config.micro_batch_size
     assert training_config.gradient_accumulation_steps > 0
@@ -210,9 +210,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
         )
 
             
-            
-            
-        if val_dataloader is not None and not is_accumulating and state["step_count"] % training_config.eval_step_interval == 0:
+        if val_dataloader is not None and not is_accumulating and state["step_count"] in training_config.eval_step_list:
             
             t0 = time.perf_counter()
             val_loss = validate(fabric, model, val_dataloader, training_config)
@@ -222,7 +220,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             fabric.log_dict({"metric/val_loss": val_loss.item(), "total_tokens": model.config.block_size * (state["iter_num"] + 1) * training_config.micro_batch_size * fabric.world_size}, state["step_count"])
             fabric.log_dict({"metric/val_ppl": math.exp(val_loss.item()), "total_tokens": model.config.block_size * (state["iter_num"] + 1) * training_config.micro_batch_size * fabric.world_size}, state["step_count"])
             fabric.barrier()
-        if not is_accumulating and state["step_count"] % training_config.save_step_interval == 0:
+        if not is_accumulating and state["step_count"] in training_config.save_step_list:
             checkpoint_path = training_config.out_dir / f"iter-{state['iter_num']:06d}-ckpt.pth"
             fabric.print(f"Saving checkpoint to {str(checkpoint_path)!r}")
             fabric.save(checkpoint_path, state)
@@ -328,6 +326,19 @@ def get_cosine_lr(it, training_config):
     coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
     return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
 
+def get_eval_step(x):
+    """Generate a list of geometric progression between 125 and X with a common ratio of 2."""
+    if x <= 0:
+        return "X must be greater than 0"
+
+    gp_list = []
+    current_value = 125
+
+    while current_value <= x:
+        gp_list.append(current_value)
+        current_value *= 2
+
+    return gp_list
 
 if __name__ == "__main__":
     # Uncomment this line if you see an error: "Expected is_sm80 to be true, but got false"
