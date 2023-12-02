@@ -50,9 +50,7 @@ python scripts/prepare_slimpajama.py --source_path data/SlimPajama-627B --tokeni
 The processed training data (chunk 1 to chunk 4) has in total 275B tokens, making our experiments in the infinite data regime (no training tokens will ever been seen more than once). 
 
 ## Training
-If your setup comprises two nodes, each with 8 GPUs, you can initiate pretraining with the following commands:
-
-On node 1:
+We run all experiments on 8 RTX 4090 with 24GB memory.
 ```
 python pretrain/tinyllama.py --training_config XXX.yaml
 ```
