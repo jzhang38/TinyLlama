@@ -3,11 +3,11 @@ import math
 import sys
 import time
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import  Tuple
 import math
 import lightning as L
 import torch
-from lightning.fabric.strategies import FSDPStrategy, XLAStrategy
+from lightning.fabric.strategies import FSDPStrategy
 from torch.utils.data import DataLoader
 from functools import partial
 import os
@@ -15,11 +15,11 @@ import os
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 # from apex.optimizers import FusedAdam #torch optimizer has a cuda backend, which is faster actually
-from lit_gpt.model import GPT, Block, Config, CausalSelfAttention
+from lit_gpt.model import GPT, Block, Config
 from lit_gpt.packed_dataset import CombinedDataset, PackedDataset
 from lit_gpt.speed_monitor import SpeedMonitorFabric as Monitor
 from lit_gpt.speed_monitor import estimate_flops, measure_flops
-from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, num_parameters, step_csv_logger, lazy_load
+from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, num_parameters, step_csv_logger
 from pytorch_lightning.loggers import WandbLogger
 from lit_gpt import FusedCrossEntropyLoss
 import random
@@ -29,17 +29,16 @@ from types import SimpleNamespace
 
 
 def setup(
-    devices: int = 8,
     training_config: str = "experiments/tinyllama.yaml"
 ) -> None:
     precision = get_default_supported_precision(training=True)
 
-    with open('tinyllama.yaml', 'r') as file:
+    with open(training_config, 'r') as file:
         training_config = yaml.safe_load(file)
         training_config = SimpleNamespace(**training_config)
-    logger = step_csv_logger("out", training_config.name, flush_logs_every_n_steps=training_config.log_step_interval * training_config.gradient_accumulation_steps)
-    wandb_logger = WandbLogger(name=training_config.name)
-    if devices > 1:
+    logger = step_csv_logger("out", training_config.name, flush_logs_every_n_steps=training_config.log_step_interval * training_config.global_batch_size // training_config.num_of_devices // training_config.micro_batch_size)
+    wandb_logger = WandbLogger(name=training_config.name, project="scaling_law")
+    if training_config.num_of_devices > 1:
         strategy = FSDPStrategy(
             auto_wrap_policy={Block},
             activation_checkpointing_policy=None,
@@ -49,8 +48,10 @@ def setup(
         )
     else:
         strategy = "auto"
-    fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=[logger, wandb_logger])
+    fabric = L.Fabric(devices=training_config.num_of_devices, strategy=strategy, precision=precision, loggers=[logger, wandb_logger])
     fabric.print(training_config)
+    
+    training_config.out_dir = "out/" + training_config.name
     if fabric.global_rank == 0:
         os.makedirs(training_config.out_dir,  exist_ok=True)
         # save training_config to out_dir
@@ -64,19 +65,18 @@ def setup(
     training_config.max_iters = training_config.max_step * training_config.gradient_accumulation_steps
     training_config.lr_decay_iters = training_config.max_iters
     training_config.log_iter_interval = training_config.log_step_interval * training_config.gradient_accumulation_steps
-    training_config.out_dir = "out/" + training_config.name
     training_config.out_dir = Path(training_config.out_dir)
-    training_config.pretrained_path = Path(training_config.pretrained_path)
+    training_config.pretrained_path = Path(training_config.pretrained_path) if training_config.pretrained_path else None
     training_config.train_data_dir = Path(training_config.train_data_dir)
     training_config.val_data_dir = Path(training_config.val_data_dir)
-    #fabric.launch(main, train_data_dir, val_data_dir, resume)
-    main(fabric, training_config)
+    fabric.launch(main, training_config)
+    # main(fabric, training_config)
 
 def main(fabric, training_config):
     monitor = Monitor(fabric, window_size=2, time_unit="seconds", log_iter_interval=training_config.log_iter_interval)
 
-    config = Config.from_name(training_config.model_name)
-
+    model_config = Config.from_name(training_config.model_name)
+    training_config.model_config = model_config
     train_dataloader, val_dataloader = create_dataloaders(
         fabric=fabric, training_config=training_config
     )
@@ -87,11 +87,11 @@ def main(fabric, training_config):
 
     fabric.seed_everything(3407)  # same seed for every process to init model (FSDP)
 
-    fabric.print(f"Loading model with {config.__dict__}")
+    fabric.print(f"Loading model with {model_config.__dict__}")
     t0 = time.perf_counter()
     with fabric.init_module(empty_init=False):
-        model = GPT(config)
-        model.apply(partial(model._init_weights ,n_layer=config.n_layer))
+        model = GPT(model_config)
+        model.apply(partial(model._init_weights ,n_layer=model_config.n_layer))
  
 
     fabric.print(f"Time to instantiate model: {time.perf_counter() - t0:.02f} seconds.")
@@ -250,12 +250,13 @@ def validate(fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoade
 
 
 def create_dataloader(
-    training_config, block_size: int, fabric, shuffle: bool = True, split="train"
+    training_config,  fabric, shuffle: bool = True, split="train"
 ) -> DataLoader:
     datasets = []
     data_config = training_config.train_data_config if split == "train" else training_config.val_data_config
+    data_dir = training_config.train_data_dir if split == "train" else training_config.val_data_dir 
     for prefix, _ in data_config:
-        filenames = sorted(glob.glob(str(training_config.data_dir / f"{prefix}*")))
+        filenames = sorted(glob.glob(str(data_dir / f"{prefix}*")))
         random.seed(training_config.seed)
         random.shuffle(filenames)
 
@@ -265,7 +266,7 @@ def create_dataloader(
             # Note that the buffer size also impacts the random shuffle
             # (PackedDataset is an IterableDataset. So the shuffle is done by prefetch a buffer and shuffle the buffer)
             n_chunks=8,
-            block_size=block_size,
+            block_size=training_config.model_config.block_size+1,
             shuffle=shuffle,
             seed=training_config.seed+fabric.global_rank,
             num_processes=fabric.world_size,
@@ -275,7 +276,7 @@ def create_dataloader(
 
     if not datasets:
         raise RuntimeError(
-            f"No data found at {training_config.data_dir}. Make sure you ran prepare_redpajama.py to create the dataset."
+            f"No data found at {data_dir}. Make sure you ran prepare_redpajama.py to create the dataset."
         )
 
     weights = [weight for _, weight in data_config]
@@ -284,17 +285,15 @@ def create_dataloader(
 
     combined_dataset = CombinedDataset(datasets=datasets, seed=training_config.seed, weights=weights)
 
-    return DataLoader(combined_dataset, batch_size=training_config.batch_size, shuffle=False, pin_memory=True)
+    return DataLoader(combined_dataset, batch_size=training_config.micro_batch_size, shuffle=False, pin_memory=True)
 
 
 def create_dataloaders(
     fabric, training_config
 ) -> Tuple[DataLoader, DataLoader]:
     # Increase by one because we need the next word as well
-    effective_block_size = training_config.block_size + 1
     train_dataloader = create_dataloader(
         training_config=training_config,
-        block_size=effective_block_size,
         fabric=fabric,
         shuffle=True,
         split="train"
@@ -302,7 +301,6 @@ def create_dataloaders(
     val_dataloader = (
         create_dataloader(
             training_config=training_config,
-            block_size=effective_block_size,
             fabric=fabric,
             shuffle=False,
             split="validation"

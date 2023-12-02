@@ -5,10 +5,16 @@ name: "llama_19M_lr_bs_step_"
 global_batch_size: 512
 learning_rate: 0.001
 min_lr: 0.0001
-micro_batch_size: 4
-num_of_devices: 8
+micro_batch_size: 2
+num_of_devices: 1
 max_step: 10000
 warmup_steps: 0
+
+# Logging 
+log_step_interval: 10
+eval_iters: 10
+save_step_interval: 5000
+eval_step_interval: 1000
 
 # Fixed Hyperparam
 weight_decay: 0.1
@@ -17,8 +23,8 @@ beta2: 0.95
 grad_clip: 1.0
 
 # Data
-train_data_dir: 
-val_data_dir: 
+train_data_dir:  data/SP_tokenized
+val_data_dir: data/SP_tokenized
 train_data_config:
   - - "train_slim"
     - 1.0
