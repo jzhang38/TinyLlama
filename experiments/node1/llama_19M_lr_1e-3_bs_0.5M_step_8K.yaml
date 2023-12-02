@@ -11,7 +11,7 @@ use_activation_checkpoint: False
 
 # Logging 
 log_step_interval: 10
-eval_iters:  32 # Essentially evaluating on 0.5M tokens
+eval_iters:  32 # Essentially evaluating on 4M tokens
 
 # Fixed Hyperparam
 weight_decay: 0.1
