@@ -225,7 +225,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             fabric.log_dict({"metric/val_ppl": math.exp(val_loss.item()), "total_tokens": model.config.block_size * (state["iter_num"] + 1) * training_config.micro_batch_size * fabric.world_size}, state["step_count"])
             fabric.barrier()
         if not is_accumulating and state["step_count"] in training_config.save_step_list:
-            checkpoint_path = training_config.out_dir / f"iter-{state['iter_num']:06d}-ckpt.pth"
+            checkpoint_path = training_config.out_dir / f"step-{state['step_count']:06d}-ckpt.pth"
             fabric.print(f"Saving checkpoint to {str(checkpoint_path)!r}")
             fabric.save(checkpoint_path, state)
 
@@ -343,16 +343,19 @@ def get_cosine_lr(it, training_config):
     return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
 
 def get_eval_step(x):
-    """Generate a list of geometric progression between 125 and X with a common ratio of 2."""
+    """Generate a list of geometric progression between 125 and 8000 with a common ratio of 2. If larger than 8000, the increment becomes constant 4000."""
     if x <= 0:
         return "X must be greater than 0"
-
+    
     gp_list = []
     current_value = 125
 
     while current_value <= x:
         gp_list.append(current_value)
-        current_value *= 2
+        if current_value >= 8000:
+            current_value += 4000
+        else:
+            current_value *=2 
 
     return gp_list
 

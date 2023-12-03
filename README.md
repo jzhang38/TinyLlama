@@ -54,7 +54,7 @@ We run all experiments on 8 RTX 4090 with 24GB memory.
 ```
 python pretrain/tinyllama.py --training_config XXX.yaml
 ```
-
+To reproduce all results, you need 8 RTX 3090 for running for 1 months.
 ## Downstream Evaluation
 Below command generate HF weight and config.json.
 ```
