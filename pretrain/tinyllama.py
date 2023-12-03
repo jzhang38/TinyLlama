@@ -100,7 +100,7 @@ def main(fabric, training_config):
 
     fabric.print(f"Time to instantiate model: {time.perf_counter() - t0:.02f} seconds.")
     fabric.print(f"Total parameters: {num_parameters(model)/1e6} million")
-    fabric.print(f"Total non-embedding parameters (as in the OpenAI paper): {calculate_non_embedding_param(model.config.n_layer, model.config.n_embd)}")
+    fabric.print(f"Total non-embedding parameters (as in the OpenAI paper): {calculate_non_embedding_param(model.config.n_layer, model.config.n_embd)/1e6} million")
     
     model = fabric.setup(model)
     optimizer = torch.optim.AdamW(
@@ -128,8 +128,8 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
     model = state["model"]
     optimizer = state["optimizer"]
 
-    if val_dataloader is not None:
-        validate(fabric, model, val_dataloader, training_config)  # sanity check
+    # if val_dataloader is not None:
+    #     validate(fabric, model, val_dataloader, training_config)  # sanity check
 
     with torch.device("meta"):
         meta_model = GPT(model.config)

@@ -1,13 +1,13 @@
-model_name: "llama_308M"
-name: "llama_308M_lr_3e-4_bs_0.5M_step_4K"
+model_name: "llama_41M"
+name: "llama_41M_lr_8e-4_bs_0.5M_step_32K"
 
 # Training Config
 global_batch_size: 256
-learning_rate: 0.0003
-min_lr: 0.00003
+learning_rate: 0.0008
+min_lr: 0.00008
 micro_batch_size: 8
-max_step: 4000
-use_activation_checkpoint: True
+max_step: 32000
+use_activation_checkpoint: False
 
 # Logging 
 log_step_interval: 2

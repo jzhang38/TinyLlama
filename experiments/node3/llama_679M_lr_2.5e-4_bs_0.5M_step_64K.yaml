@@ -1,12 +1,12 @@
-model_name: "llama_85M"
-name: "llama_85M_lr_6e-4_bs_0.5M_step_1K"
+model_name: "llama_679M"
+name: "llama_679M_lr_2.5e-4_bs_0.5M_step_64K"
 
 # Training Config
 global_batch_size: 256
-learning_rate: 0.0006
-min_lr: 0.00006
-micro_batch_size: 8
-max_step: 1000
+learning_rate: 0.00025
+min_lr: 0.000025
+micro_batch_size: 2
+max_step: 64000
 use_activation_checkpoint: False
 
 # Logging 
@@ -36,3 +36,6 @@ seed: 3407
 resume: false
 pretrained_path: None
 
+# Other notes. No use to training.
+
+# Time on 8 RTX 4090: 75 Hours 
