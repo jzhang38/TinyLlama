@@ -202,7 +202,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
  
         monitor.on_train_batch_end(
             state["iter_num"] * training_config.micro_batch_size,
-            state["iter_num"] * flops_per_device_per_mini_batch / 1e9,
+            state["iter_num"] * flops_per_device_per_mini_batch / 1e12, # in Trillion
             t1 - total_t0,
             # this assumes that device FLOPs are the same and that all devices have the same batch size
             fabric.world_size,
