@@ -221,8 +221,12 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             t1 = time.perf_counter() - t0
             monitor.eval_end(t1)
             fabric.print(f"step {state['iter_num']}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms")
-            fabric.log_dict({"metric/val_loss": val_loss.item(), "total_tokens": model.config.block_size * (state["iter_num"] + 1) * training_config.micro_batch_size * fabric.world_size}, state["step_count"])
-            fabric.log_dict({"metric/val_ppl": math.exp(val_loss.item()), "total_tokens": model.config.block_size * (state["iter_num"] + 1) * training_config.micro_batch_size * fabric.world_size}, state["step_count"])
+            fabric.log_dict({
+                "metric/val_loss": val_loss.item(),
+                "metric/val_ppl": math.exp(val_loss.item()),
+                "total_tokens": model.config.block_size * (state["iter_num"] + 1) * training_config.micro_batch_size * fabric.world_size, 
+                "TFLOPS": state["iter_num"] * flops_per_device_per_mini_batch / 1e12 * fabric.world_size}, 
+                            state["step_count"])
             fabric.barrier()
         if not is_accumulating and state["step_count"] in training_config.save_step_list:
             checkpoint_path = training_config.out_dir / f"step-{state['step_count']:06d}-ckpt.pth"
