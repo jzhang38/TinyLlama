@@ -18,7 +18,6 @@ sys.path.append(str(wd))
 from src.model import GPT, Block, Config
 from src.packed_dataset import CombinedDataset, PackedDataset
 from src.speed_monitor import SpeedMonitorFabric as Monitor
-from src.speed_monitor import estimate_flops
 from src.utils import chunked_cross_entropy, get_default_supported_precision, num_parameters, step_csv_logger
 from pytorch_lightning.loggers import WandbLogger
 from src.fused_cross_entropy import FusedCrossEntropyLoss
@@ -136,8 +135,8 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
         # "estimated" is not as precise as "measured". Estimated is optimistic but widely used in the wild.
         # When comparing MFU or FLOP numbers with other projects that use estimated FLOPs,
         # consider passing `SpeedMonitor(flops_per_batch=estimated_flops)` instead
-        estimated_flops = estimate_flops(meta_model) * training_config.micro_batch_size
-        fabric.print(f"Estimated TFLOPs: {estimated_flops * fabric.world_size / 1e12:.2f}")
+        flops_per_device_per_mini_batch = estimate_flops_per_token(model.config.n_layer, model.config.n_embd, model.config.block_size) * model.config.block_size * training_config.micro_batch_size
+        fabric.print(f"Estimated TFLOPs: {flops_per_device_per_mini_batch * fabric.world_size / 1e12:.2f}")
         x = torch.randint(0, 1, (training_config.micro_batch_size, model.config.block_size))
         # measured_flos run in meta. Will trigger fusedRMSNorm error
         #measured_flops = measure_flops(meta_model, x)
@@ -203,11 +202,12 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
  
         monitor.on_train_batch_end(
             state["iter_num"] * training_config.micro_batch_size,
+            state["iter_num"] * flops_per_device_per_mini_batch / 1e9,
             t1 - total_t0,
             # this assumes that device FLOPs are the same and that all devices have the same batch size
             fabric.world_size,
             state["step_count"],
-            flops_per_batch=estimated_flops,
+            flops_per_batch=flops_per_device_per_mini_batch,
             lengths=total_lengths,
             train_loss = loss.item(),
             lr = lr
@@ -327,6 +327,15 @@ def calculate_non_embedding_param(n_layer, n_embd):
     total = attn_param + ff_param
     return total
     
+def estimate_flops_per_token(n_layer, n_embd, block_size):
+    """
+    Ref: https://arxiv.org/pdf/2001.08361.pdf
+    Assuming Llama architecture, MHA, attention dim == n_embd. FF intermediate size is calculated as (n_embd * 8 / 3) and rounded up to the multiple of 256.
+    """
+    total_param = calculate_non_embedding_param(n_layer, n_embd)
+    forward_flops_per_token = 2* total_param + 2 * block_size * n_layer * n_embd
+    total_flops_token = forward_flops_per_token * 3
+    return total_flops_token
     
 # learning rate decay scheduler (cosine with warmup)
 def get_cosine_lr(it, training_config):
@@ -343,7 +352,7 @@ def get_cosine_lr(it, training_config):
     return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
 
 def get_eval_step(x):
-    """Generate a list of geometric progression between 125 and 8000 with a common ratio of 2. If larger than 8000, the increment becomes constant 4000."""
+    """Generate a list of geometric progression between 125 and 16000 with a common ratio of 2. If larger than 16000, the increment becomes constant 8000."""
     if x <= 0:
         return "X must be greater than 0"
     
@@ -352,12 +361,14 @@ def get_eval_step(x):
 
     while current_value <= x:
         gp_list.append(current_value)
-        if current_value >= 8000:
-            current_value += 4000
+        if current_value >= 16000:
+            current_value += 8000
         else:
             current_value *=2 
 
     return gp_list
+
+
 
 if __name__ == "__main__":
     # Uncomment this line if you see an error: "Expected is_sm80 to be true, but got false"
