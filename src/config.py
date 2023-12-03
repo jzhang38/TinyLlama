@@ -175,24 +175,6 @@ LLaMA = [
     ),
     dict(
         org="StatNLP",
-        name="llama_170M",
-        # -----Change here------# 
-        n_layer=24,
-        n_embd=768,
-        n_head=12,
-         # -----Fixed Hyperparam------# 
-        rotary_percentage=1.0,
-        parallel_residual=False,
-        bias=False,
-        _norm_class="FusedRMSNorm",
-        norm_eps=1e-5, #Llama 2 use 1e-5. Llama 1 use 1e-6
-        _mlp_class="LLaMAMLP",
-        block_size=2048,
-        vocab_size=32000,
-        padding_multiple=64,
-    ),
-    dict(
-        org="StatNLP",
         name="llama_231M",
         # -----Change here------# 
         n_layer=18,
