@@ -1,17 +1,17 @@
-model_name: "llama_1200M"
-name: "llama_1200M_lr_2e-4_bs_1M_step_32K"
+model_name: "llama_308M"
+name: "llama_308M_lr_3e-4_bs_0.5M_step_64K"
 
 # Training Config
-global_batch_size: 512
-learning_rate: 0.0002
-min_lr: 0.00002
-micro_batch_size: 4
-max_step: 32000
+global_batch_size: 256
+learning_rate: 0.0003
+min_lr: 0.00003
+micro_batch_size: 8
+max_step: 64000
 use_activation_checkpoint: True
 
 # Logging 
-log_step_interval: 50
-eval_iters: 64 # Essentially evaluating on 4M tokens
+log_step_interval: 2
+ 
 
 # Fixed Hyperparam
 weight_decay: 0.1

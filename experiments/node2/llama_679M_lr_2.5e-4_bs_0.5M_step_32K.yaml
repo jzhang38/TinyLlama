@@ -1,17 +1,17 @@
-model_name: "llama_700M"
-name: "llama_700M_lr_2.5e-4_bs_0.5M_step_4K"
+model_name: "llama_679M"
+name: "llama_679M_lr_2.5e-4_bs_0.5M_step_32K"
 
 # Training Config
 global_batch_size: 256
 learning_rate: 0.00025
 min_lr: 0.000025
 micro_batch_size: 8
-max_step: 4000
+max_step: 32000
 use_activation_checkpoint: True
 
 # Logging 
-log_step_interval: 50
-eval_iters: 32 # Essentially evaluating on 4M tokens
+log_step_interval: 2
+ 
 
 # Fixed Hyperparam
 weight_decay: 0.1

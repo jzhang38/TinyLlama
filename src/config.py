@@ -65,7 +65,7 @@ class Config:
         if self.intermediate_size is None:
             if self._mlp_class == "LLaMAMLP":
                 # round up to the multiple of 128
-                self.intermediate_size = math.ceil(self.n_embd * 8 / 3 / 128) * 128
+                self.intermediate_size = math.ceil(self.n_embd * 8 / 3 / 256) * 256
             else:
                 self.intermediate_size = 4 * self.n_embd
 
@@ -139,7 +139,7 @@ LLaMA = [
     ),
     dict(
         org="StatNLP",
-        name="llama_300M",
+        name="llama_308M",
         # -----Change here------# 
         n_layer=24,
         n_embd=1024,
@@ -157,7 +157,7 @@ LLaMA = [
     ),
     dict(
         org="StatNLP",
-        name="llama_700M",
+        name="llama_679M",
         # -----Change here------# 
         n_layer=24,
         n_embd=1536,
@@ -175,7 +175,7 @@ LLaMA = [
     ),
     dict(
         org="StatNLP",
-        name="llama_1200M",
+        name="llama_1233M",
         # -----Change here------# 
         n_layer=24,
         n_embd=2048,

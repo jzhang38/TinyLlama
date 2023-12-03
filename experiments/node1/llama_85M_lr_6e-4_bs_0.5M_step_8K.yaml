@@ -10,8 +10,8 @@ max_step: 8000
 use_activation_checkpoint: False
 
 # Logging 
-log_step_interval: 50
-eval_iters: 32 # Essentially evaluating on 4M tokens
+log_step_interval: 2
+ 
 
 # Fixed Hyperparam
 weight_decay: 0.1

@@ -62,6 +62,8 @@ def setup(
     training_config.eval_step_list = get_eval_step(training_config.max_step)
     training_config.batch_size = training_config.global_batch_size // training_config.num_of_devices
     training_config.gradient_accumulation_steps = training_config.batch_size // training_config.micro_batch_size
+    #Calculate validation loss on 32M tokens
+    training_config.eval_iters = 32678000 // 2048 // training_config.micro_batch_size // training_config.num_of_devices
     assert training_config.gradient_accumulation_steps > 0
     training_config.warmup_iters = training_config.warmup_steps * training_config.gradient_accumulation_steps
     training_config.max_iters = training_config.max_step * training_config.gradient_accumulation_steps
@@ -97,8 +99,9 @@ def main(fabric, training_config):
  
 
     fabric.print(f"Time to instantiate model: {time.perf_counter() - t0:.02f} seconds.")
-    fabric.print(f"Total parameters {num_parameters(model):,}")
-
+    fabric.print(f"Total parameters: {num_parameters(model)/1e6} million")
+    fabric.print(f"Total non-embedding parameters (as in the OpenAI paper): {calculate_non_embedding_param(model.config.n_layer, model.config.n_embd)}")
+    
     model = fabric.setup(model)
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=training_config.learning_rate, weight_decay=training_config.weight_decay, betas=(training_config.beta1,training_config.beta2), foreach=False
@@ -311,7 +314,20 @@ def create_dataloaders(
     )
     return train_dataloader, val_dataloader
 
-
+def calculate_non_embedding_param(n_layer, n_embd):
+    """
+    Assuming Llama architecture, MHA, attention dim == n_embd. FF intermediate size is calculated as (n_embd * 8 / 3) and rounded up to the multiple of 256. 
+    attn_param = 4 * n_embd * n_layer * n_attn
+    ff_param = n_embd * n_ff * 3
+    """
+    n_ff = math.ceil(n_embd * 8 / 3 / 256) * 256
+    n_attn = n_embd
+    attn_param = 4 * n_embd * n_layer * n_attn
+    ff_param = n_embd * n_ff * 3  * n_layer
+    total = attn_param + ff_param
+    return total
+    
+    
 # learning rate decay scheduler (cosine with warmup)
 def get_cosine_lr(it, training_config):
     # 1) linear warmup for warmup_iters steps
