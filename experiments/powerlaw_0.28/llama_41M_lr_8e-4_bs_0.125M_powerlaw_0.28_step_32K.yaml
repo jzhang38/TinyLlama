@@ -1,0 +1,38 @@
+model_name: "llama_41M"
+name: "llama_41M_lr_8e-4_bs_0.125M_powerlaw_0.28_step_32K"
+
+# Training Config
+global_batch_size: 64
+learning_rate: 0.0008
+min_lr: 0.00008
+micro_batch_size: 8
+max_step: 32000
+use_activation_checkpoint: False
+lr_schedule: "powerlaw_0.28"
+# Logging 
+log_step_interval: 2
+ 
+
+# Fixed Hyperparam
+weight_decay: 0.1
+beta1: 0.9
+beta2: 0.95
+grad_clip: 1.0
+warmup_steps: 200
+num_of_devices: 8
+
+# Data
+train_data_dir:  data/SP_tokenized
+val_data_dir: data/SP_tokenized
+train_data_config:
+  - - "train_slim"
+    - 1.0
+val_data_config:
+  - - "validation"
+    - 1.0
+seed: 3407
+
+# Resume
+resume: false
+pretrained_path: None
+

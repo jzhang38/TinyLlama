@@ -26,12 +26,22 @@ for file in experiments/node5/llama*.yaml; do
     python pretrain/tinyllama.py --training_config "$file"
 done
 
-for file in experiments/node6/llama*.yaml; do
+for file in experiments/cosine_logx/llama*.yaml; do
     # Run the python command with each file
     python pretrain/tinyllama.py --training_config "$file"
 done
 
-for file in experiments/node7/llama*.yaml; do
+for file in experiments/linear_logx/llama*.yaml; do
+    # Run the python command with each file
+    python pretrain/tinyllama.py --training_config "$file"
+done
+
+for file in experiments/powerlaw_0.5/llama*.yaml; do
+    # Run the python command with each file
+    python pretrain/tinyllama.py --training_config "$file"
+done
+
+for file in experiments/powerlaw_0.28/llama*.yaml; do
     # Run the python command with each file
     python pretrain/tinyllama.py --training_config "$file"
 done
