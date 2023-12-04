@@ -1,5 +1,5 @@
 model_name: "llama_41M"
-name: "llama_41M_lr_8e-4_bs_0.125M_logx_cosine_logx_step_2K"
+name: "llama_41M_lr_8e-4_bs_0.125M_cosine_logx_step_2K"
 
 # Training Config
 global_batch_size: 64
