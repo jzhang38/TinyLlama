@@ -358,25 +358,13 @@ def get_cosine_lr(it, training_config):
         decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters)
         coeff = 1 - decay_ratio
         return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
-    if training_config.lr_schedule == "linear_logx": 
-        decay_ratio = math.log(it - training_config.warmup_iters + 1)/ math.log(training_config.lr_decay_iters - training_config.warmup_iters) # +1 to avoid log(0)
-        coeff = 1 - decay_ratio
+    if training_config.lr_schedule == "logx_linear":
+        coeff = 1 - (math.log(it) - math.log(training_config.warmup_iters))  / (math.log(training_config.lr_decay_iters) - math.log(training_config.warmup_iters)) 
         return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
-    if training_config.lr_schedule == "cosine_logx": 
-        decay_ratio = math.log(it - training_config.warmup_iters + 1)/ math.log(training_config.lr_decay_iters - training_config.warmup_iters) # +1 to avoid log(0)
+    if training_config.lr_schedule == "logx_cosine":
+        decay_ratio = (math.log(it) - math.log(training_config.warmup_iters)) / (math.log(training_config.lr_decay_iters) - math.log(training_config.warmup_iters))
         coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
         return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
-    if training_config.lr_schedule == "powerlaw_0.5":
-        # This is essentially the IRS schedule used in the T5 paper
-        decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters)
-        coeff = 1 / (decay_ratio) ** 0.5
-        return coeff * training_config.learning_rate
-    if training_config.lr_schedule == "powerlaw_0.28":
-        #the beta in chinchilla scaling law is 0.28
-        decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters)
-        coeff = 1 / (decay_ratio) ** 0.28
-        return coeff * training_config.learning_rate
-    
 def get_eval_step(x):
     """Generate a list of geometric progression between 125 and 16000 with a common ratio of 2. If larger than 16000, the increment becomes constant 8000."""
     if x <= 0:
