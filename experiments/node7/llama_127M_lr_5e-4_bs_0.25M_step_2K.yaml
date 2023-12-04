@@ -1,5 +1,5 @@
 model_name: "llama_127M"
-name: "llama_127M_lr_5e-4_bs_0.25M_step_2K"
+name: "llama_127M_lr_5e-4_bs_0.25M_linear_logx_step_2K"
 
 # Training Config
 global_batch_size: 128
