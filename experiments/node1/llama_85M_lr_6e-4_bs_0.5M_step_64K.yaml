@@ -8,7 +8,7 @@ min_lr: 0.00006
 micro_batch_size: 8
 max_step: 64000
 use_activation_checkpoint: False
-
+lr_schedule: "cosine"
 # Logging 
 log_step_interval: 2
  

@@ -7,8 +7,8 @@ learning_rate: 0.00025
 min_lr: 0.000025
 micro_batch_size: 2
 max_step: 32000
-use_activation_checkpoint: False
-
+use_activation_checkpoint: False 
+lr_schedule: "cosine"
 # Logging 
 log_step_interval: 2
  

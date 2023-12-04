@@ -345,16 +345,28 @@ def estimate_flops_per_token(n_layer, n_embd, block_size):
 def get_cosine_lr(it, training_config):
     # 1) linear warmup for warmup_iters steps
     if it < training_config.warmup_iters:
-        return training_config.learning_rate * it / training_config.warmup_iters
+            return training_config.learning_rate * it / training_config.warmup_iters
     # 2) if it > lr_decay_iters, return min learning rate
     if it > training_config.lr_decay_iters:
         return training_config.min_lr
-    # 3) in between, use cosine decay down to min learning rate
-    decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters)
-    assert 0 <= decay_ratio <= 1
-    coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
-    return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
-
+    if training_config.lr_schedule == "cosine":
+        decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters)
+        # 3) in between, use cosine decay down to min learning rate
+        coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
+        return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
+    if training_config.lr_schedule == "linear":
+        decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters)
+        coeff = 1 - decay_ratio
+        return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
+    if training_config.lr_schedule == "linear_logx": 
+        decay_ratio = math.log(it - training_config.warmup_iters + 1)/ math.log(training_config.lr_decay_iters - training_config.warmup_iters) # +1 to avoid log(0)
+        coeff = 1 - decay_ratio
+        return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
+    if training_config.lr_schedule == "cosine_logx": 
+        decay_ratio = math.log(it - training_config.warmup_iters + 1)/ math.log(training_config.lr_decay_iters - training_config.warmup_iters) # +1 to avoid log(0)
+        coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
+        return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
+    
 def get_eval_step(x):
     """Generate a list of geometric progression between 125 and 16000 with a common ratio of 2. If larger than 16000, the increment becomes constant 8000."""
     if x <= 0:
