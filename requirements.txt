@@ -1,4 +1,4 @@
-lightning
+lightning==2.1.2
 lightning[app]
 jsonargparse[signatures]  # CLI
 pandas
