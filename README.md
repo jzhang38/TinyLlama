@@ -41,6 +41,7 @@ Base models:
 | 2023-12-11 | [TinyLlama-1.1B-intermediate-step-1195k-token-2.5T](https://huggingface.co/TinyLlama/TinyLlama-1.1B-intermediate-step-1195k-token-2.5T)              | 2.5T     | 1195k    |53.86 |
 | 2023-12-26 | --                                             | 3T   | --    |-- |
 
+We are crafting a note offering possible explaination on why there is a significant improvement from 2T to 2.5T checkpoint (It is related to [bos_id issue](https://github.com/jzhang38/TinyLlama/issues/83))
 
 Chat models:
 
