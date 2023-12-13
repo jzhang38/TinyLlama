@@ -12,8 +12,8 @@ import torch
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from src import Config
-from src.utils import NotYetLoadedTensor, incremental_save, lazy_load
+from lit_gpt import Config
+from lit_gpt.utils import NotYetLoadedTensor, incremental_save, lazy_load
 
 
 
