@@ -164,6 +164,9 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
                 fabric.barrier()
                 fabric.print("resume finished, taken {} seconds".format(time.perf_counter() - total_t0))
         if state["iter_num"] >= training_config.max_iters:
+            checkpoint_path = training_config.out_dir / f"step-{state['step_count']:06d}-ckpt.pth"
+            fabric.print(f"Saving checkpoint to {str(checkpoint_path)!r}")
+            fabric.save(checkpoint_path, state)
             break
         
         # determine and set the learning rate for this iteration
@@ -232,6 +235,8 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             checkpoint_path = training_config.out_dir / f"step-{state['step_count']:06d}-ckpt.pth"
             fabric.print(f"Saving checkpoint to {str(checkpoint_path)!r}")
             fabric.save(checkpoint_path, state)
+            
+
 
         
 @torch.no_grad()
