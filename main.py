@@ -35,8 +35,8 @@ def setup(
     with open(training_config, 'r') as file:
         training_config = yaml.safe_load(file)
         training_config = SimpleNamespace(**training_config)
-    logger = step_csv_logger("out", training_config.name, flush_logs_every_n_steps=training_config.log_step_interval * training_config.per_node_batch_size // training_config.num_of_devices // training_config.per_gpu_batch_size)
-    wandb_logger = WandbLogger(name=training_config.name, project="scaling_law")
+    logger = step_csv_logger("out", training_config.run_name, flush_logs_every_n_steps=training_config.log_step_interval * training_config.per_node_batch_size // training_config.num_of_devices // training_config.micro_batch_size)
+    wandb_logger = WandbLogger(name=training_config.run_name, project=training_config.project_name)
     if training_config.num_of_devices > 1:
         strategy = FSDPStrategy(
             auto_wrap_policy={Block},
@@ -51,7 +51,7 @@ def setup(
     fabric = L.Fabric(devices=training_config.num_of_devices, strategy=strategy, precision=precision, loggers=[logger, wandb_logger])
     fabric.print(training_config)
     
-    training_config.out_dir = "out/" + training_config.name
+    training_config.out_dir = "out/" + training_config.run_name
     if fabric.global_rank == 0:
         os.makedirs(training_config.out_dir,  exist_ok=True)
         # save training_config to out_dir
@@ -60,9 +60,9 @@ def setup(
     training_config.save_step_list = get_eval_step(training_config.max_step)
     training_config.eval_step_list = get_eval_step(training_config.max_step)
     training_config.batch_size = training_config.per_node_batch_size // training_config.num_of_devices
-    training_config.gradient_accumulation_steps = training_config.batch_size // training_config.per_gpu_batch_size
+    training_config.gradient_accumulation_steps = training_config.batch_size // training_config.micro_batch_size
     #Calculate validation loss on 32M tokens
-    training_config.eval_iters = 32678000 // 2048 // training_config.per_gpu_batch_size // training_config.num_of_devices
+    training_config.eval_iters = 32678000 // 2048 // training_config.micro_batch_size // training_config.num_of_devices
     assert training_config.gradient_accumulation_steps > 0
     training_config.warmup_iters = training_config.warmup_steps * training_config.gradient_accumulation_steps
     training_config.max_iters = training_config.max_step * training_config.gradient_accumulation_steps
@@ -72,8 +72,8 @@ def setup(
     training_config.pretrained_path = Path(training_config.pretrained_path) if training_config.pretrained_path else None
     training_config.train_data_dir = Path(training_config.train_data_dir)
     training_config.val_data_dir = Path(training_config.val_data_dir)
-    fabric.launch(main, training_config)
-    # main(fabric, training_config)
+    # fabric.launch(main, training_config)
+    main(fabric, training_config)
 
 def main(fabric, training_config):
     monitor = Monitor(fabric, window_size=2, time_unit="seconds", log_iter_interval=training_config.log_iter_interval)
@@ -135,9 +135,9 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
         # "estimated" is not as precise as "measured". Estimated is optimistic but widely used in the wild.
         # When comparing MFU or FLOP numbers with other projects that use estimated FLOPs,
         # consider passing `SpeedMonitor(flops_per_batch=estimated_flops)` instead
-        flops_per_device_per_mini_batch = estimate_flops_per_token(model.config.n_layer, model.config.n_embd, model.config.block_size) * model.config.block_size * training_config.per_gpu_batch_size
+        flops_per_device_per_mini_batch = estimate_flops_per_token(model.config.n_layer, model.config.n_embd, model.config.block_size) * model.config.block_size * training_config.micro_batch_size
         fabric.print(f"Estimated TFLOPs: {flops_per_device_per_mini_batch * fabric.world_size / 1e12:.2f}")
-        x = torch.randint(0, 1, (training_config.per_gpu_batch_size, model.config.block_size))
+        x = torch.randint(0, 1, (training_config.micro_batch_size, model.config.block_size))
         # measured_flos run in meta. Will trigger fusedRMSNorm error
         #measured_flops = measure_flops(meta_model, x)
         #fabric.print(f"Measured TFLOPs: {measured_flops * fabric.world_size / 1e12:.2f}")
@@ -201,7 +201,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             )
  
         monitor.on_train_batch_end(
-            state["iter_num"] * training_config.per_gpu_batch_size,
+            state["iter_num"] * training_config.micro_batch_size,
             state["iter_num"] * flops_per_device_per_mini_batch / 1e12, # in Trillion
             t1 - total_t0,
             # this assumes that device FLOPs are the same and that all devices have the same batch size
@@ -224,7 +224,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             fabric.log_dict({
                 "metric/val_loss": val_loss.item(),
                 "metric/val_ppl": math.exp(val_loss.item()),
-                "total_tokens": model.config.block_size * (state["iter_num"] + 1) * training_config.per_gpu_batch_size * fabric.world_size, 
+                "total_tokens": model.config.block_size * (state["iter_num"] + 1) * training_config.micro_batch_size * fabric.world_size, 
                 "TFLOPS": state["iter_num"] * flops_per_device_per_mini_batch / 1e12 * fabric.world_size}, 
                             state["step_count"])
             fabric.barrier()
@@ -293,7 +293,7 @@ def create_dataloader(
 
     combined_dataset = CombinedDataset(datasets=datasets, seed=training_config.seed, weights=weights)
 
-    return DataLoader(combined_dataset, batch_size=training_config.per_gpu_batch_size, shuffle=False, pin_memory=True)
+    return DataLoader(combined_dataset, batch_size=training_config.micro_batch_size, shuffle=False, pin_memory=True)
 
 
 def create_dataloaders(
@@ -358,13 +358,7 @@ def get_cosine_lr(it, training_config):
         decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters)
         coeff = 1 - decay_ratio
         return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
-    if training_config.lr_schedule == "logx_linear":
-        coeff = 1 - (math.log(it) - math.log(training_config.warmup_iters))  / (math.log(training_config.lr_decay_iters) - math.log(training_config.warmup_iters)) 
-        return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
-    if training_config.lr_schedule == "logx_cosine":
-        decay_ratio = (math.log(it) - math.log(training_config.warmup_iters)) / (math.log(training_config.lr_decay_iters) - math.log(training_config.warmup_iters))
-        coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
-        return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
+    
 def get_eval_step(x):
     """Generate a list of geometric progression between 125 and 16000 with a common ratio of 2. If larger than 16000, the increment becomes constant 8000."""
     if x <= 0:

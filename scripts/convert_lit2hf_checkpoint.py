@@ -41,18 +41,32 @@ def copy_weights_llama(
     state_dict: Dict[str, torch.Tensor],
     lit_weights: Dict[str, Union[torch.Tensor, NotYetLoadedTensor]],
     saver: Optional[incremental_save] = None,
+    use_xformers_swiglu: bool = True
 ):
-    weight_map = {
-        "transformer.wte.weight": "model.embed_tokens.weight",
-        "transformer.h.{}.norm_1.weight": "model.layers.{}.input_layernorm.weight",
-        "transformer.h.{}.attn.proj.weight": "model.layers.{}.self_attn.o_proj.weight",
-        "transformer.h.{}.norm_2.weight": "model.layers.{}.post_attention_layernorm.weight",
-        "transformer.h.{}.mlp.fc_1.weight": "model.layers.{}.mlp.gate_proj.weight",
-        "transformer.h.{}.mlp.fc_2.weight": "model.layers.{}.mlp.up_proj.weight",
-        "transformer.h.{}.mlp.proj.weight": "model.layers.{}.mlp.down_proj.weight",
-        "transformer.ln_f.weight": "model.norm.weight",
-        "lm_head.weight": "lm_head.weight",
-    }
+    if use_xformers_swiglu:
+        weight_map = {
+            "transformer.wte.weight": "model.embed_tokens.weight",
+            "transformer.h.{}.norm_1.weight": "model.layers.{}.input_layernorm.weight",
+            "transformer.h.{}.attn.proj.weight": "model.layers.{}.self_attn.o_proj.weight",
+            "transformer.h.{}.norm_2.weight": "model.layers.{}.post_attention_layernorm.weight",
+            "transformer.h.{}.mlp.swiglu.w1.weight": "model.layers.{}.mlp.gate_proj.weight",
+            "transformer.h.{}.mlp.swiglu.w2.weight": "model.layers.{}.mlp.up_proj.weight",
+            "transformer.h.{}.mlp.swiglu.w3.weight": "model.layers.{}.mlp.down_proj.weight",
+            "transformer.ln_f.weight": "model.norm.weight",
+            "lm_head.weight": "lm_head.weight",
+        }
+    else:
+        weight_map = {
+            "transformer.wte.weight": "model.embed_tokens.weight",
+            "transformer.h.{}.norm_1.weight": "model.layers.{}.input_layernorm.weight",
+            "transformer.h.{}.attn.proj.weight": "model.layers.{}.self_attn.o_proj.weight",
+            "transformer.h.{}.norm_2.weight": "model.layers.{}.post_attention_layernorm.weight",
+            "transformer.h.{}.mlp.fc_1.weight": "model.layers.{}.mlp.gate_proj.weight",
+            "transformer.h.{}.mlp.fc_2.weight": "model.layers.{}.mlp.up_proj.weight",
+            "transformer.h.{}.mlp.proj.weight": "model.layers.{}.mlp.down_proj.weight",
+            "transformer.ln_f.weight": "model.norm.weight",
+            "lm_head.weight": "lm_head.weight",
+        }
     for name, param in lit_weights.items():
         if name.endswith(".attn.attn.weight"):
             from_name, number = layer_template(name, 2)
@@ -196,11 +210,13 @@ def convert_lit_checkpoint(*,
     checkpoint_name: str, 
     out_dir: Path, 
     model_name: str,
-    model_only: bool = False) -> None:
+    model_only: bool = False,
+    use_xformers_swiglu:bool = True
+    ) -> None:
     config = Config.from_name(model_name)
 
 
-    copy_fn = partial(copy_weights_llama, config)
+    copy_fn = partial(copy_weights_llama, config, use_xformers_swiglu=use_xformers_swiglu)
   
 
     # initialize a new empty state dict to hold our new weights

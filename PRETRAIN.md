@@ -50,7 +50,7 @@ The processed training data (chunk 1 to chunk 4) has in total 275B tokens, makin
 
 ## Training
 ```
-python pretrain/tinyllama.py --training_config XXX.yaml
+lightning run model --devices=8 main.py --training_config training_configs/tinyllama.yaml
 ```
 ## Downstream Evaluation
 Below command generate HF weight and config.json.

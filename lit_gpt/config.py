@@ -49,6 +49,7 @@ class Config:
     _mlp_class: Literal["GptNeoxMLP", "LLaMAMLP"] = "GptNeoxMLP"
     intermediate_size: Optional[int] = None
     condense_ratio: int = 1
+    use_xformers_swiglu: bool = True
 
     def __post_init__(self):
         # error checking
@@ -262,7 +263,7 @@ LLaMA = [
         block_size=2048,
         vocab_size=32000,
         padding_multiple=64,
-    )
+    ),
     dict(
         org="StatNLP-research",
         name="tiny_LLaMA_1b",
@@ -284,6 +285,5 @@ LLaMA = [
 ]
 
 configs.extend(LLaMA)
-
 
 name_to_config = {config["name"]: config for config in configs}

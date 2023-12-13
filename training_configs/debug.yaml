@@ -1,14 +1,14 @@
-model_name: "tiny_LLaMA_1b"
-run_name: "tiny_LLaMA_1b"
+model_name: "llama_85M"
+run_name: "llama_85M_debug"
 project_name: "TinyLlama"
 
 
 # Training Config
-per_node_batch_size: 512
-learning_rate: 0.0004
-min_lr: 0.00004
-micro_batch_size: 2
-max_step: 1430512
+per_node_batch_size: 128
+learning_rate: 0.0006
+min_lr: 0.00006
+micro_batch_size: 8
+max_step: 16000
 # xformers swiglu is not compatible with activation checkpointing
 use_activation_checkpoint: False 
 use_xformers_swiglu: True
@@ -22,7 +22,7 @@ weight_decay: 0.1
 beta1: 0.9
 beta2: 0.95
 grad_clip: 1.0
-warmup_steps: 2000
+warmup_steps: 200
 num_of_devices: 8
 
 # Data
@@ -31,9 +31,8 @@ val_data_dir: data/slim_star_combined
 train_data_config:
   - - "train_slim"
     - 0.693584
-  - - "train_star"
-    - 0.306416
-
+  # - - "train_star"
+  #   - 0.306416
 val_data_config:
   - - "validation"
     - 1.0

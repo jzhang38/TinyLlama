@@ -25,22 +25,40 @@ def copy_weights_hf_llama(
     hf_weights: Dict[str, Union[torch.Tensor, NotYetLoadedTensor]],
     saver: Optional[incremental_save] = None,
     dtype: Optional[torch.dtype] = None,
+    use_xformers_swiglu = True,
 ) -> None:
-    weight_map = {
-        "model.embed_tokens.weight": "transformer.wte.weight",
-        "model.layers.{}.input_layernorm.weight": "transformer.h.{}.norm_1.weight",
-        "model.layers.{}.self_attn.q_proj.weight": None,
-        "model.layers.{}.self_attn.k_proj.weight": None,
-        "model.layers.{}.self_attn.v_proj.weight": None,
-        "model.layers.{}.self_attn.o_proj.weight": "transformer.h.{}.attn.proj.weight",
-        "model.layers.{}.self_attn.rotary_emb.inv_freq": None,
-        "model.layers.{}.post_attention_layernorm.weight": "transformer.h.{}.norm_2.weight",
-        "model.layers.{}.mlp.gate_proj.weight": "transformer.h.{}.mlp.fc_1.weight",
-        "model.layers.{}.mlp.up_proj.weight":  "transformer.h.{}.mlp.fc_2.weight",
-        "model.layers.{}.mlp.down_proj.weight": "transformer.h.{}.mlp.proj.weight",
-        "model.norm.weight": "transformer.ln_f.weight",
-        "lm_head.weight": "lm_head.weight",
-    }
+    if use_xformers_swiglu:
+        weight_map = {
+            "model.embed_tokens.weight": "transformer.wte.weight",
+            "model.layers.{}.input_layernorm.weight": "transformer.h.{}.norm_1.weight",
+            "model.layers.{}.self_attn.q_proj.weight": None,
+            "model.layers.{}.self_attn.k_proj.weight": None,
+            "model.layers.{}.self_attn.v_proj.weight": None,
+            "model.layers.{}.self_attn.o_proj.weight": "transformer.h.{}.attn.proj.weight",
+            "model.layers.{}.self_attn.rotary_emb.inv_freq": None,
+            "model.layers.{}.post_attention_layernorm.weight": "transformer.h.{}.norm_2.weight",
+            "model.layers.{}.mlp.gate_proj.weight": "transformer.h.{}.mlp.swiglu.w1.weight",
+            "model.layers.{}.mlp.up_proj.weight": "transformer.h.{}.mlp.swiglu.w2.weight",
+            "model.layers.{}.mlp.down_proj.weight": "transformer.h.{}.mlp.swiglu.w3.weight",
+            "model.norm.weight": "transformer.ln_f.weight",
+            "lm_head.weight": "lm_head.weight",
+        }
+    else:
+        weight_map = {
+            "model.embed_tokens.weight": "transformer.wte.weight",
+            "model.layers.{}.input_layernorm.weight": "transformer.h.{}.norm_1.weight",
+            "model.layers.{}.self_attn.q_proj.weight": None,
+            "model.layers.{}.self_attn.k_proj.weight": None,
+            "model.layers.{}.self_attn.v_proj.weight": None,
+            "model.layers.{}.self_attn.o_proj.weight": "transformer.h.{}.attn.proj.weight",
+            "model.layers.{}.self_attn.rotary_emb.inv_freq": None,
+            "model.layers.{}.post_attention_layernorm.weight": "transformer.h.{}.norm_2.weight",
+            "model.layers.{}.mlp.gate_proj.weight": "transformer.h.{}.mlp.fc_1.weight",
+            "model.layers.{}.mlp.up_proj.weight":  "transformer.h.{}.mlp.fc_2.weight",
+            "model.layers.{}.mlp.down_proj.weight": "transformer.h.{}.mlp.proj.weight",
+            "model.norm.weight": "transformer.ln_f.weight",
+            "lm_head.weight": "lm_head.weight",
+        }
 
     for name, param in hf_weights.items():
         if "model.layers" in name:
@@ -105,6 +123,7 @@ def convert_hf_checkpoint(
     checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
     model_name: Optional[str] = None,
     dtype: Optional[str] = None,
+    use_xformers_swiglu = False
 ) -> None:
     if model_name is None:
         model_name = checkpoint_dir.name
@@ -118,7 +137,7 @@ def convert_hf_checkpoint(
 
 
     qkv_weights = {}
-    copy_fn = partial(copy_weights_hf_llama, config, qkv_weights)
+    copy_fn = partial(copy_weights_hf_llama, config, qkv_weights, use_xformers_swiglu=use_xformers_swiglu)
 
 
     # initialize a new empty state dict to hold our new weights
