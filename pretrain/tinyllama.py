@@ -25,16 +25,16 @@ import random
 
 model_name = "tiny_LLaMA_1b"
 name = "tinyllama_1b"
-checkpoint_path = "out/TinyLlama-1.1B-intermediate-step-240k-503b/lit_model.pth"
+checkpoint_path = "TinyLlama-1.1B-intermediate-step-1431k-3T/lit_model.pth"
 out_dir = Path("out") / name
 
 # Hyperparameters
 num_of_devices = 8
 global_batch_size = 512
-learning_rate = 4e-4
+learning_rate = 4e-5
 micro_batch_size = 8
-max_step = 715256 * 2
-warmup_steps = 2000
+max_step = 715 * 2
+warmup_steps = 0
 log_step_interval = 10
 eval_iters = 100
 save_step_interval = 5000
@@ -46,7 +46,7 @@ beta1 = 0.9
 beta2 = 0.95
 grad_clip = 1.0
 decay_lr = True
-min_lr = 4e-5
+min_lr = 0
 
 batch_size = global_batch_size // num_of_devices
 gradient_accumulation_steps = batch_size // micro_batch_size
