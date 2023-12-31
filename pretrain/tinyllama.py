@@ -25,6 +25,7 @@ import random
 
 model_name = "tiny_LLaMA_1b"
 name = "tinyllama_1b"
+checkpoint_path = "out/TinyLlama-1.1B-intermediate-step-240k-503b/lit_model.pth"
 out_dir = Path("out") / name
 
 # Hyperparameters
@@ -62,8 +63,8 @@ log_iter_interval = log_step_interval * gradient_accumulation_steps
 
 # Treat all dataset equally by their size. If you want to use a different weight for a dataset, add it to the list with the weight.
 train_data_config = [
-    ("train_slim", 0.693584),
-    ("train_star", 0.306416),
+    ("train_slim", 0.95),
+    ("train_star", 0.5),
 ]
 
 val_data_config = [
@@ -130,17 +131,17 @@ def main(fabric, train_data_dir, val_data_dir, resume):
 
     fabric.seed_everything(3407)  # same seed for every process to init model (FSDP)
 
-    fabric.print(f"Loading model with {config.__dict__}")
+    fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}")
     t0 = time.perf_counter()
-    with fabric.init_module(empty_init=False):
+    with fabric.init_module(empty_init=True):
         model = GPT(config)
-        model.apply(partial(model._init_weights ,n_layer=config.n_layer))
+    
  
-
+    model = fabric.setup(model)
+    fabric.load_raw(checkpoint_path, model, strict=True)
     fabric.print(f"Time to instantiate model: {time.perf_counter() - t0:.02f} seconds.")
     fabric.print(f"Total parameters {num_parameters(model):,}")
 
-    model = fabric.setup(model)
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=(beta1, beta2), foreach=False
     )
@@ -371,20 +372,14 @@ def create_dataloaders(
     return train_dataloader, val_dataloader
 
 
-# learning rate decay scheduler (cosine with warmup)
-def get_lr(it):
-    # 1) linear warmup for warmup_iters steps
+def get_linear_lr(it):
     if it < warmup_iters:
         return learning_rate * it / warmup_iters
-    # 2) if it > lr_decay_iters, return min learning rate
     if it > lr_decay_iters:
         return min_lr
-    # 3) in between, use cosine decay down to min learning rate
     decay_ratio = (it - warmup_iters) / (lr_decay_iters - warmup_iters)
     assert 0 <= decay_ratio <= 1
-    coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
-    return min_lr + coeff * (learning_rate - min_lr)
-
+    return learning_rate - decay_ratio * (learning_rate - min_lr)
 
 if __name__ == "__main__":
     # Uncomment this line if you see an error: "Expected is_sm80 to be true, but got false"
