@@ -33,7 +33,7 @@ num_of_devices = 8
 global_batch_size = 512
 learning_rate = 4e-5
 micro_batch_size = 8
-max_step = 715 * 2
+max_step = 7152 * 2
 warmup_steps = 0
 log_step_interval = 10
 eval_iters = 100
@@ -370,8 +370,7 @@ def create_dataloaders(
     )
     return train_dataloader, val_dataloader
 
-
-def get_linear_lr(it):
+def get_lr(it):
     if it < warmup_iters:
         return learning_rate * it / warmup_iters
     if it > lr_decay_iters:
@@ -379,6 +378,7 @@ def get_linear_lr(it):
     decay_ratio = (it - warmup_iters) / (lr_decay_iters - warmup_iters)
     assert 0 <= decay_ratio <= 1
     return learning_rate - decay_ratio * (learning_rate - min_lr)
+
 
 if __name__ == "__main__":
     # Uncomment this line if you see an error: "Expected is_sm80 to be true, but got false"
