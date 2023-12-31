@@ -24,7 +24,7 @@ from lit_gpt import FusedCrossEntropyLoss
 import random
 
 model_name = "tiny_LLaMA_1b"
-name = "tinyllama_1b"
+name = "tinyllama_1b_cool_down"
 checkpoint_path = "TinyLlama-1.1B-intermediate-step-1431k-3T/lit_model.pth"
 out_dir = Path("out") / name
 
@@ -72,7 +72,6 @@ val_data_config = [
 ]
 
 hparams = {k: v for k, v in locals().items() if isinstance(v, (int, float, str)) and not k.startswith("_")}
-logger = step_csv_logger("out", name, flush_logs_every_n_steps=log_iter_interval)
 wandb_logger = WandbLogger()
 
 
@@ -102,7 +101,7 @@ def setup(
     else:
         strategy = "auto"
 
-    fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=[logger, wandb_logger])
+    fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=[wandb_logger])
     fabric.print(hparams)
     #fabric.launch(main, train_data_dir, val_data_dir, resume)
     main(fabric, train_data_dir, val_data_dir, resume)
