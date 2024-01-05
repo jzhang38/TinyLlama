@@ -162,12 +162,13 @@ This project is currently contributed by [Peiyuan Zhang](https://veiled-texture-
 If you find our work valuable, please cite:
 
 ```
-@online{tinyllama,
-  author    = {Peiyuan Zhang, Guangtao Zeng, Tianduo Wang and Wei Lu},
-  title     = {TinyLlama},
-  url       = {https://github.com/jzhang38/TinyLlama},
-  year      = {2023},
-  month     = {Sep}
+@misc{zhang2024tinyllama,
+      title={TinyLlama: An Open-Source Small Language Model}, 
+      author={Peiyuan Zhang and Guangtao Zeng and Tianduo Wang and Wei Lu},
+      year={2024},
+      eprint={2401.02385},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
 }
 ```
 
