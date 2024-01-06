@@ -151,7 +151,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             break
         
         # determine and set the learning rate for this iteration
-        lr = get_cosine_lr(state["iter_num"], training_config)
+        lr = get_lr(state["iter_num"], training_config)
         for param_group in optimizer.param_groups:
             param_group["lr"] = lr
 
@@ -285,7 +285,13 @@ def create_dataloader(
         )
 
     weights = [weight for _, weight in data_config.items()]
-    combined_dataset = CombinedDataset(datasets=datasets, seed=training_config.seed, weights=weights, gradient_accumulation_steps=training_config.gradient_accumulation_steps, micro_batch_size=training_config.micro_batch_size)
+    combined_dataset = CombinedDataset(
+        datasets=datasets,
+        seed=training_config.seed+fabric.global_rank,
+        weights=weights,
+        gradient_accumulation_steps=training_config.gradient_accumulation_steps,
+        micro_batch_size=training_config.micro_batch_size
+    )
     return DataLoader(combined_dataset, batch_size=training_config.micro_batch_size, shuffle=False, pin_memory=True)
 
 
@@ -371,22 +377,25 @@ def handle_training_config(training_config):
 
     
 # learning rate decay scheduler (cosine with warmup)
-def get_cosine_lr(it, training_config):
+def get_lr(it, training_config):
     # 1) linear warmup for warmup_iters steps
     if it < training_config.warmup_iters:
             return training_config.learning_rate * it / training_config.warmup_iters
     # 2) if it > lr_decay_iters, return min learning rate
     if it > training_config.lr_decay_iters:
         return training_config.min_lr
+
     if training_config.lr_schedule == "cosine":
         decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters)
         # 3) in between, use cosine decay down to min learning rate
         coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio))  # coeff ranges 0..1
         return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
+
     if training_config.lr_schedule == "linear":
         decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters)
         coeff = 1 - decay_ratio
         return training_config.min_lr + coeff * (training_config.learning_rate - training_config.min_lr)
+
     if training_config.lr_schedule == "cosine_with_final_linear_cool_down":
         if it <= training_config.lr_decay_iters - training_config.final_linear_cool_down_iters: 
             decay_ratio = (it - training_config.warmup_iters) / (training_config.lr_decay_iters - training_config.warmup_iters - training_config.final_linear_cool_down_iters)
