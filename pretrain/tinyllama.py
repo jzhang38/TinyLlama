@@ -352,27 +352,30 @@ def handle_training_config(training_config):
     
     # process data config
     new_train_data_config = {}
-    
+
     # List of all datasets from both stages
     all_datasets = set()
-    for stage in ['stage_1', 'stage_2']:
-        all_datasets.update(training_config.train_data_config[stage]['datasets'].keys())
+    for stage in training_config.train_data_config['stages']:
+        all_datasets.update(stage['datasets'].keys())
 
     # Iterating through all datasets and stages to reformat the structure
     for dataset in all_datasets:
         new_train_data_config[dataset] = {}
-        for stage in ['stage_1', 'stage_2']:
-            stage_data = training_config.train_data_config[stage] if stage in training_config.train_data_config else {}
-            dataset_data = stage_data['datasets'].get(dataset, {})
+        start_step = 0
+        for stage in training_config.train_data_config['stages']:
+            stage_name = stage['name']
+            dataset_data = stage['datasets'].get(dataset, {})
             start_weight = dataset_data if isinstance(dataset_data, int) else dataset_data.get('start_weight', 0)
             end_weight = dataset_data if isinstance(dataset_data, int) else dataset_data.get('end_weight', start_weight)
-            new_train_data_config[dataset][stage] = {
-                'start_step': 0 if stage == 'stage_1' else 10000,
-                'end_step': stage_data['end_step'],
+            new_train_data_config[dataset][stage_name] = {
+                'start_step': start_step,
+                'end_step': stage['end_step'],
                 'start_weight': start_weight,
                 'end_weight': end_weight
             }
-    
+            end_step = stage['end_step']
+            start_step = end_step
+
     training_config.train_data_config = new_train_data_config
 
     

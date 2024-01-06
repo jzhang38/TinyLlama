@@ -32,12 +32,13 @@ val_data_dir: ../tinyllama_pretrain_data
 
 
 train_data_config:
-  stage_1:
+  stages:
+  - name: stage_1
     datasets:
       train_star: 30
     end_step: 10000
 
-  stage_2:
+  - name: stage_2
     datasets:
       train_star:
         start_weight: 5
@@ -47,30 +48,6 @@ train_data_config:
         end_weight: 50
     end_step: 20000
 
-train_data_config:
-  train_star:
-    stage_1:
-      start_step: 0
-      end_step: 10000
-      start_weight: 30
-      end_weight: 30
-    stage_2:
-      start_step: 10000
-      end_step: 20000
-      start_weight: 5
-      end_weight: 10
-  train_slim:
-    stage_1:
-      start_step: 0
-      end_step: 10000
-      start_weight: 0
-      end_weight: 0
-    stage_2:
-      start_step: 10000
-      end_step: 20000
-      start_weight: 10
-      end_weight: 50
-    
 
 val_data_config:
   validation: 100
