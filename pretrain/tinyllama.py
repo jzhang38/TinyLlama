@@ -343,6 +343,31 @@ def handle_training_config(training_config):
     training_config.pretrained_path = Path(training_config.pretrained_path) if training_config.pretrained_path else None
     training_config.train_data_dir = Path(training_config.train_data_dir)
     training_config.val_data_dir = Path(training_config.val_data_dir)
+    
+    # process data config
+    new_train_data_config = {}
+    
+    # List of all datasets from both stages
+    all_datasets = set()
+    for stage in ['stage_1', 'stage_2']:
+        all_datasets.update(training_config.train_data_config[stage]['datasets'].keys())
+
+    # Iterating through all datasets and stages to reformat the structure
+    for dataset in all_datasets:
+        new_train_data_config[dataset] = {}
+        for stage in ['stage_1', 'stage_2']:
+            stage_data = training_config.train_data_config[stage] if stage in training_config.train_data_config else {}
+            dataset_data = stage_data['datasets'].get(dataset, {})
+            start_weight = dataset_data if isinstance(dataset_data, int) else dataset_data.get('start_weight', 0)
+            end_weight = dataset_data if isinstance(dataset_data, int) else dataset_data.get('end_weight', start_weight)
+            new_train_data_config[dataset][stage] = {
+                'start_step': 0 if stage == 'stage_1' else 10000,
+                'end_step': stage_data['end_step'],
+                'start_weight': start_weight,
+                'end_weight': end_weight
+            }
+    
+    training_config.train_data_config = new_train_data_config
 
     
 # learning rate decay scheduler (cosine with warmup)

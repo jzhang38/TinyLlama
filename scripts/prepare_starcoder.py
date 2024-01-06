@@ -12,8 +12,8 @@ from multiprocessing import Process, cpu_count
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-import lit_gpt.packed_dataset as packed_dataset
-from lit_gpt import Tokenizer
+import src.packed_dataset as packed_dataset
+from src import Tokenizer
 
 import pandas as pd
 

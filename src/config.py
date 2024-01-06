@@ -4,8 +4,8 @@ from typing import Any, Literal, Optional, Type
 import torch
 from typing_extensions import Self
 
-import lit_gpt.model
-from lit_gpt.utils import find_multiple
+import src.model
+from src.utils import find_multiple
 
 
 @dataclass
@@ -44,7 +44,7 @@ class Config:
     # credit https://arxiv.org/pdf/2305.13245.pdf
     n_query_groups: Optional[int] = None
     shared_attention_norm: bool = False
-    _norm_class: Literal["LayerNorm", "RMSNorm"] = "LayerNorm"
+    _norm_class: Literal["LayerNorm", "RMSNorm", "FusedRMSNorm"] = "LayerNorm"
     norm_eps: float = 1e-5
     _mlp_class: Literal["GptNeoxMLP", "LLaMAMLP"] = "GptNeoxMLP"
     intermediate_size: Optional[int] = None
@@ -80,18 +80,18 @@ class Config:
     @property
     def mlp_class(self) -> Type:
         # `self._mlp_class` cannot be the type to keep the config json serializable
-        return getattr(lit_gpt.model, self._mlp_class)
+        return getattr(src.model, self._mlp_class)
 
     @property
     def norm_class(self) -> Type:
         # `self._norm_class` cannot be the type to keep the config json serializable
         if self._norm_class == "RMSNorm":
-            from lit_gpt.rmsnorm import RMSNorm
-
+            from src.model import RMSNorm
             return RMSNorm
         elif self._norm_class == "FusedRMSNorm":
-            from lit_gpt.rmsnorm import FusedRMSNorm
+            from flash_attn.ops.rms_norm import RMSNorm as FusedRMSNorm
             return FusedRMSNorm
+
         return getattr(torch.nn, self._norm_class)
 
 

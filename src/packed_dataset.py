@@ -212,24 +212,53 @@ class PackedDatasetIterator:
 
 
 class CombinedDataset(IterableDataset):
-    def __init__(self, datasets, seed, weights=None):
+    def __init__(self, datasets, seed, weights, gradient_accumulation_steps, micro_batch_size):
         self._seed = seed
         self._datasets = datasets
         self._weights = weights
-        n_datasets = len(datasets)
-        if weights is None:
-            self._weights = [1 / n_datasets] * n_datasets
-
+        self._gradient_accumulation_steps = gradient_accumulation_steps
+        self._micro_batch_size = micro_batch_size
     def __iter__(self):
-        return CombinedDatasetIterator(self._datasets, self._seed, self._weights)
+        return CombinedDatasetIterator(self._datasets, self._seed, self._weights, self._gradient_accumulation_steps, self._micro_batch_size)
 
 
 class CombinedDatasetIterator:
-    def __init__(self, datasets, seed, weights):
+    def __init__(self, datasets, seed, weights, gradient_accumulation_steps, micro_batch_size):
         self._datasets = [iter(el) for el in datasets]
         self._weights = weights
         self._rng = random.Random(seed)
-
+        self._gradient_accumulation_steps = gradient_accumulation_steps
+        self.instance_number = 0
+        self._micro_batch_size = micro_batch_size
+        
+        
+    def _calculate_weights(self):
+        weights = []
+        for w in self._weights:
+            if isinstance(w, dict):
+                # determine which stage we are in
+                stage = None
+                for s in w:
+                    if self.instance_number <= w[s]["end_step"] * self._gradient_accumulation_steps *  self._micro_batch_size and self.instance_number >= w[s]["start_step"] * self._gradient_accumulation_steps *  self._micro_batch_size:
+                        stage = s
+                        break
+                start_instance_number = w[stage]["start_step"] * self._gradient_accumulation_steps *  self._micro_batch_size
+                end_instance_number = w[stage]["end_step"] * self._gradient_accumulation_steps *  self._micro_batch_size
+                start_weight = w[stage]["start_weight"]
+                end_weight = w[stage]["end_weight"]
+                # linearly interpolate between start_weight and end_weight
+                # based on the current iteration
+                weight = start_weight + (end_weight - start_weight) * (self.instance_number - start_instance_number) / (end_instance_number - start_instance_number)
+                weights.append(weight)
+            else:
+                weights.append(w)
+        # normalize weights
+        weights_sum = sum(weights)
+        weights =[w / weights_sum for w in weights]
+        return weights
+        
     def __next__(self):
-        (dataset,) = self._rng.choices(self._datasets, weights=self._weights, k=1)
+        weights = self._calculate_weights()
+        (dataset,) = self._rng.choices(self._datasets, weights=weights, k=1)
+        self.instance_number += 1
         return next(dataset)
