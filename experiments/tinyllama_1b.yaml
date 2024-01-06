@@ -1,0 +1,77 @@
+model_name: "tiny_LLaMA_1b"
+name: "tiny_LLaMA_1b_cool_down"
+
+# Training Config
+per_node_batch_size: 512
+learning_rate: 0.0004
+min_lr: 0.00004
+micro_batch_size: 8
+max_step: 1430512
+use_activation_checkpoint: True
+lr_schedule: "cosine"
+final_linear_cool_down_steps: 10
+
+save_step_interval: 5000
+eval_step_interval: 5000
+
+# Logging 
+log_step_interval: 2
+ 
+
+# Fixed Hyperparam
+weight_decay: 0.1
+beta1: 0.9
+beta2: 0.95
+grad_clip: 1.0
+warmup_steps: 2000
+num_of_devices: 4
+
+# Data
+train_data_dir:  ../tinyllama_pretrain_data
+val_data_dir: ../tinyllama_pretrain_data
+
+train_data_config:
+  stage_1:
+    datasets:
+      train_star:
+        start_weight: 30
+        end_weight: 5
+      train_slim:
+        start_weight: 30
+        end_weight: 5
+    end_step: 14304
+
+  stage_2:
+    datasets:
+      train_star:
+        start_weight: 30
+        end_weight: 5
+      train_slim:
+        start_weight: 30
+        end_weight: 5
+    end_step: 14304
+
+# train_data_config:
+#   train_star:
+#     stage_1:
+#       start_step: 0
+#       end_step: 14304
+#       start_weight: 30
+#       end_weight: 5
+#   train_slim:
+#     stage_1:
+#       start_step: 0
+#       end_step: 14304
+#       start_weight: 70
+#       end_weight: 95
+    
+
+val_data_config:
+  validation: 100
+
+seed: 3407
+
+# Resume
+resume: false
+pretrained_path: None
+
