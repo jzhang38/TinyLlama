@@ -1,7 +1,7 @@
 import gradio as gr
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers import StoppingCriteria, StoppingCriteriaList
+from transformers import StoppingCriteria, StoppingCriteriaList,StoppingCriteriaList,TextIteratorStreamer
 from threading import Thread
 
 # Loading the tokenizer and model from Hugging Face's model hub.
