@@ -219,12 +219,14 @@ class SpeedMonitorBase:
     def on_train_batch_end(
         self,
         samples: int,  # total samples seen (per device)
+        total_tflops_per_device: int, 
         train_elapsed: float,  # total training time (seconds)
         world_size: int,
         step_count: int,
         flops_per_batch: Optional[int] = None,  # (per device)
         lengths: Optional[int] = None,  # total length of the samples seen (per device)
         train_loss: Optional[float] = None,
+        lr = None,
     ):
         self.iter += 1
         metrics = {}
@@ -258,6 +260,7 @@ class SpeedMonitorBase:
                         "throughput/tokens_per_sec": samples_per_sec * avg_length,
                         "throughput/device/tokens_per_sec": dev_samples_per_sec * avg_length,
                         "total_tokens": avg_length * world_size * samples,
+                        "TFLOPS": total_tflops_per_device * world_size, 
                     }
                 )
                 if train_loss is not None:
@@ -268,6 +271,7 @@ class SpeedMonitorBase:
                             "metric/train_ppl": math.exp(avg_loss)
                         }
                     )
+
 
         if flops_per_batch is not None:
             # sum of flops per batch across ranks
@@ -289,6 +293,7 @@ class SpeedMonitorBase:
                 "time/val": self.total_eval_wct / self.divider,
                 "time/total": (train_elapsed + self.total_eval_wct) / self.divider,
                 "samples": samples,
+                "lr": lr,
             }
         )
         if self.iter % self.log_iter_interval == 0:
@@ -367,43 +372,5 @@ class SpeedMonitorCallback(Callback):
         self.speed_monitor.eval_end(eval_elapsed)
 
 
-def flops_per_param(config: Config, n_params: int) -> int:
-    flops_per_token = 2 * n_params  # each parameter is used for a MAC (2 FLOPS) per network operation
-    # this assumes that all samples have a fixed length equal to the block size
-    # which is most likely false during finetuning
-    flops_per_seq = flops_per_token * config.block_size
-    attn_flops_per_seq = config.n_layer * 2 * 2 * (config.n_embd * (config.block_size**2))
-    return flops_per_seq + attn_flops_per_seq
 
 
-def estimate_flops(model: GPT) -> int:
-    """Measures estimated FLOPs for MFU.
-
-    Refs:
-        * https://ar5iv.labs.arxiv.org/html/2205.05198#A1
-        * https://ar5iv.labs.arxiv.org/html/2204.02311#A2
-    """
-    # using all parameters for this is a naive over estimation because not all model parameters actually contribute to
-    # this FLOP computation (e.g. embedding, norm). For this reason, the result will be higher by a fixed percentage
-    # (~10%) compared to the measured FLOPs, making those lower but more realistic.
-    # For a proper estimate, this needs a more fine-grained calculation as in Appendix A of the paper.
-    n_trainable_params = num_parameters(model, requires_grad=True)
-    trainable_flops = flops_per_param(model.config, n_trainable_params)
-    # forward + backward + gradients (assumes no gradient accumulation)
-    ops_per_step = 3 if model.training else 1
-    n_frozen_params = num_parameters(model, requires_grad=False)
-    frozen_flops = flops_per_param(model.config, n_frozen_params)
-    # forward + backward
-    frozen_ops_per_step = 2 if model.training else 1
-    return ops_per_step * trainable_flops + frozen_ops_per_step * frozen_flops
-
-
-def measure_flops(model: GPT, x: torch.Tensor) -> int:
-    """Measures real FLOPs for HFU"""
-    flop_counter = FlopCounterMode(model, display=False)
-    ctx = nullcontext() if model.training else torch.no_grad()
-    with ctx, flop_counter:
-        y = model(x)
-        if model.training:
-            y.sum().backward()
-    return flop_counter.get_total_flops()

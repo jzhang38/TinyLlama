@@ -134,7 +134,8 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
     
     initial_iter = state["iter_num"]
     curr_iter = 0
-            
+    
+    fabric.print(f"Start training...")
     loss_func = FusedCrossEntropyLoss()
     for  train_data in train_dataloader:
         # resume loader state. This is not elegant but it works. Should rewrite it in the future.
