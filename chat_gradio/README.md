@@ -1,7 +1,7 @@
-## Tinyllama Chatbot Implementation with Gradio
+![image](https://github.com/jzhang38/TinyLlama/assets/35529532/749ce371-a433-4df0-b179-c562958fb4dd)## Tinyllama Chatbot Implementation with Gradio
 
 We offer an easy way to interact with Tinyllama. This guide explains how to set up a local Gradio demo for a chatbot using TinyLlama.
-(A demo is also available on the Hugging Face Space [TinyLlama/tinyllama_chatbot](https://huggingface.co/spaces/TinyLlama/tinyllama_chatbot)) or Colab [colab](https://colab.research.google.com/drive/1qAuL5wTIa-USaNBu8DH35KQtICTnuLsy?usp=sharing).
+(A demo is also available on the Hugging Face Space [TinyLlama/tinyllama_chatbot](https://huggingface.co/spaces/TinyLlama/tinyllama-chat)) or Colab [colab](https://colab.research.google.com/drive/1qAuL5wTIa-USaNBu8DH35KQtICTnuLsy?usp=sharing).
 
 ### Requirements
 * Python>=3.8
