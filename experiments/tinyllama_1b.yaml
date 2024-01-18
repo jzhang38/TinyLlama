@@ -1,5 +1,5 @@
 model_name: "tiny_LLaMA_1b"
-name: "tiny_LLaMA_1b_cool_down"
+name: "tiny_LLaMA_1b"
 
 # Training Config
 per_node_batch_size: 512
@@ -7,7 +7,7 @@ learning_rate: 0.0004
 min_lr: 0.00004
 micro_batch_size: 8
 max_step: 1430512
-use_activation_checkpoint: True
+use_activation_checkpoint: False
 lr_schedule: "cosine"
 final_linear_cool_down_steps: 10
 
@@ -27,26 +27,27 @@ warmup_steps: 2000
 num_of_devices: 4
 
 # Data
-train_data_dir:  ../tinyllama_pretrain_data
-val_data_dir: ../tinyllama_pretrain_data
+train_data_dir:  data/tinyllama_pretrain_data
+val_data_dir: data/tinyllama_pretrain_data
 
 
 train_data_config:
   stages:
   - name: stage_1
     datasets:
+      train_slim: 70
       train_star: 30
-    end_step: 10000
+    end_step: 1430512
 
-  - name: stage_2
-    datasets:
-      train_star:
-        start_weight: 5
-        end_weight: 10
-      train_slim:
-        start_weight: 10
-        end_weight: 50
-    end_step: 20000
+  # - name: stage_2
+  #   datasets:
+  #     train_star:
+  #       start_weight: 5
+  #       end_weight: 10
+  #     train_slim:
+  #       start_weight: 10
+  #       end_weight: 50
+  #   end_step: 20000
 
 
 val_data_config:

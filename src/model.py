@@ -13,7 +13,7 @@ from typing_extensions import Self
 from flash_attn import flash_attn_func
 from src.config import Config
 from xformers.ops import SwiGLU
-from flash_attn.layers.rotary import apply_rotary_emb_func
+from src.fused_rotary_embed import apply_rotary_emb_func
 RoPECache = Tuple[torch.Tensor, torch.Tensor]
 KVCache = Tuple[torch.Tensor, torch.Tensor]
 FlashAttention2Available = RequirementCache("flash-attn>=2.0.0.post1")

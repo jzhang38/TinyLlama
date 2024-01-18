@@ -18,13 +18,12 @@ sys.path.append(str(wd))
 from src.model import GPT, Block, Config
 from src.packed_dataset import CombinedDataset, PackedDataset
 from src.speed_monitor import SpeedMonitorFabric as Monitor
-from src.utils import chunked_cross_entropy, get_default_supported_precision, num_parameters, step_csv_logger
+from src.utils import chunked_cross_entropy, get_default_supported_precision, num_parameters
 from pytorch_lightning.loggers import WandbLogger
-from flash_attn.losses.cross_entropy  import CrossEntropyLoss as FusedCrossEntropyLoss
+from src.fused_cross_entropy import FusedCrossEntropyLoss
 import random
 import yaml
 from types import SimpleNamespace
-
 
 
 def setup(
@@ -35,7 +34,7 @@ def setup(
     with open(training_config, 'r') as file:
         training_config = yaml.safe_load(file)
         training_config = SimpleNamespace(**training_config)
-    logger = step_csv_logger("out", training_config.name, flush_logs_every_n_steps=training_config.log_step_interval * training_config.per_node_batch_size // training_config.num_of_devices // training_config.micro_batch_size)
+
     wandb_logger = WandbLogger(name=training_config.name, project="TinyLlama")
     if training_config.num_of_devices > 1:
         strategy = FSDPStrategy(
@@ -48,7 +47,7 @@ def setup(
         )
     else:
         strategy = "auto"
-    fabric = L.Fabric(devices=training_config.num_of_devices, strategy=strategy, precision=precision, loggers=[logger, wandb_logger])
+    fabric = L.Fabric(devices=training_config.num_of_devices, strategy=strategy, precision=precision, loggers=[wandb_logger])
     fabric.print(training_config)
     training_config.out_dir = "out/" + training_config.name
     if fabric.global_rank == 0:
@@ -57,6 +56,9 @@ def setup(
         with open(training_config.out_dir+ '/training_config.yaml', 'w') as file:
             yaml.dump(vars(training_config), file)
             
+            
+    
+
     
     handle_training_config(training_config)
 
@@ -117,21 +119,12 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
     if val_dataloader is not None:
         validate(fabric, model, val_dataloader, training_config)  # sanity check
 
-    with torch.device("meta"):
-        meta_model = GPT(model.config)
-        # "estimated" is not as precise as "measured". Estimated is optimistic but widely used in the wild.
-        # When comparing MFU or FLOP numbers with other projects that use estimated FLOPs,
-        # consider passing `SpeedMonitor(flops_per_batch=estimated_flops)` instead
-        flops_per_device_per_mini_batch = estimate_flops_per_token(model) * model.config.block_size * training_config.micro_batch_size
-        fabric.print(f"Estimated TFLOPs: {flops_per_device_per_mini_batch * fabric.world_size / 1e12:.2f}")
-        x = torch.randint(0, 1, (training_config.micro_batch_size, model.config.block_size))
-        del meta_model, x
+    flops_per_device_per_mini_batch = estimate_flops_per_token(model.config.n_layer, model.config.n_embd, model.config.block_size) * model.config.block_size * training_config.micro_batch_size
+    fabric.print(f"Estimated TFLOPs: {flops_per_device_per_mini_batch * fabric.world_size / 1e12:.2f}")
 
     total_lengths = 0
     total_t0 = time.perf_counter()
 
-    
-    
     initial_iter = state["iter_num"]
     curr_iter = 0
     
@@ -196,6 +189,9 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             lr = lr
         )
 
+
+            
+    
             
         if val_dataloader is not None and not is_accumulating and state["step_count"] % training_config.eval_step_interval == 0:
             
@@ -212,13 +208,12 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
                             state["step_count"])
             fabric.barrier()
         if not is_accumulating and state["step_count"] % training_config.save_step_interval == 0:
-            checkpoint_path = training_config.out_dir / f"step-{state['step_count']:06d}-ckpt.pth"
+            checkpoint_path = training_config.out_dir / f"step-{state['step_count']:07d}-ckpt.pth"
             fabric.print(f"Saving checkpoint to {str(checkpoint_path)!r}")
             fabric.save(checkpoint_path, state)
-        
+
         if state["iter_num"] >= training_config.max_iters:
             break
-
 
     val_loss = validate(fabric, model, val_dataloader, training_config)
     fabric.log_dict({
@@ -228,7 +223,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
                 "TFLOPS": state["iter_num"] * flops_per_device_per_mini_batch / 1e12 * fabric.world_size}, 
                             state["step_count"])
     fabric.barrier()
-    checkpoint_path = training_config.out_dir / f"step-{state['step_count']:06d}-ckpt.pth"
+    checkpoint_path = training_config.out_dir / f"step-{state['step_count']:07d}-ckpt.pth"
     fabric.print(f"Saving checkpoint to {str(checkpoint_path)!r}")
     fabric.save(checkpoint_path, state)
 
@@ -261,8 +256,11 @@ def create_dataloader(
 ) -> DataLoader:
     datasets = []
     data_config = training_config.train_data_config if split == "train" else training_config.val_data_config
-    data_dir = training_config.train_data_dir if split == "train" else training_config.val_data_dir 
-    for prefix, _ in data_config.items():
+    data_dir = training_config.train_data_dir if split == "train" else training_config.val_data_dir
+    
+    prefix_keys = sorted(data_config.keys())
+
+    for prefix in prefix_keys:
         filenames = sorted(glob.glob(str(data_dir / f"{prefix}*")))
         random.seed(training_config.seed)
         random.shuffle(filenames)
@@ -286,7 +284,7 @@ def create_dataloader(
             f"No data found at {data_dir}. Make sure you ran prepare_redpajama.py to create the dataset."
         )
 
-    weights = [weight for _, weight in data_config.items()]
+    weights = [data_config[prefix] for prefix in prefix_keys]
     combined_dataset = CombinedDataset(
         datasets=datasets,
         seed=training_config.seed+fabric.global_rank,
@@ -319,26 +317,13 @@ def create_dataloaders(
     )
     return train_dataloader, val_dataloader
 
-    
-def estimate_flops_per_token(model):
-    """
-    Ref: https://arxiv.org/pdf/2001.08361.pdf
-    Assuming Llama architecture, MHA, attention dim == n_embd. FF intermediate size is calculated as (n_embd * 8 / 3) and rounded up to the multiple of 256.
-    """
-    n_layer, n_embd, block_size = model.config.n_layer, model.config.n_embd, model.config.block_size
-    total_param = num_parameters(model)
-    forward_flops_per_token = 2* total_param + 2 * block_size * n_layer * n_embd
-    total_flops_token = forward_flops_per_token * 3
-    return total_flops_token
-
 
 def handle_training_config(training_config):
     training_config.batch_size = training_config.per_node_batch_size // training_config.num_of_devices
     training_config.gradient_accumulation_steps = training_config.batch_size // training_config.micro_batch_size
     assert training_config.gradient_accumulation_steps > 0
-    #Calculate validation loss on 32M tokens
-    training_config.eval_iters = 32678000 // 2048 // training_config.micro_batch_size // training_config.num_of_devices
 
+    training_config.eval_iters = 32
     # Calculate the number of iters
     training_config.warmup_iters = training_config.warmup_steps * training_config.gradient_accumulation_steps
     training_config.max_iters = training_config.max_step * training_config.gradient_accumulation_steps
@@ -351,24 +336,36 @@ def handle_training_config(training_config):
     training_config.pretrained_path = Path(training_config.pretrained_path) if training_config.pretrained_path else None
     training_config.train_data_dir = Path(training_config.train_data_dir)
     training_config.val_data_dir = Path(training_config.val_data_dir)
-    
+
+    # handle data config
+    training_config.train_data_config = handle_data_config(training_config.train_data_config)
+    # We don't convert val_data_config now
+    # training_config.val_data_config = handle_data_config(training_config.val_data_config)
+
+
+def handle_data_config(data_config):
     # process data config
     new_train_data_config = {}
 
     # List of all datasets from both stages
     all_datasets = set()
-    for stage in training_config.train_data_config['stages']:
+    for stage in data_config['stages']:
         all_datasets.update(stage['datasets'].keys())
 
     # Iterating through all datasets and stages to reformat the structure
     for dataset in all_datasets:
         new_train_data_config[dataset] = {}
         start_step = 0
-        for stage in training_config.train_data_config['stages']:
+        for stage in data_config['stages']:
             stage_name = stage['name']
             dataset_data = stage['datasets'].get(dataset, {})
-            start_weight = dataset_data if isinstance(dataset_data, int) else dataset_data.get('start_weight', 0)
-            end_weight = dataset_data if isinstance(dataset_data, int) else dataset_data.get('end_weight', start_weight)
+            try:
+                dataset_data = float(dataset_data)
+                start_weight = dataset_data
+                end_weight = dataset_data
+            except TypeError:
+                start_weight = dataset_data.get('start_weight', 0)
+                end_weight = dataset_data.get('end_weight', start_weight)
             new_train_data_config[dataset][stage_name] = {
                 'start_step': start_step,
                 'end_step': stage['end_step'],
@@ -377,10 +374,34 @@ def handle_training_config(training_config):
             }
             end_step = stage['end_step']
             start_step = end_step
+    return new_train_data_config
 
-    training_config.train_data_config = new_train_data_config
 
-    
+def calculate_non_embedding_param(n_layer, n_embd):
+    """
+    Assuming Llama architecture, MHA, attention dim == n_embd. FF intermediate size is calculated as (n_embd * 8 / 3) and rounded up to the multiple of 256. 
+    attn_param = 4 * n_embd * n_layer * n_attn
+    ff_param = n_embd * n_ff * 3
+    """
+    n_ff = math.ceil(n_embd * 8 / 3 / 256) * 256
+    n_attn = n_embd
+    attn_param = 4 * n_embd * n_layer * n_attn
+    ff_param = n_embd * n_ff * 3  * n_layer
+    total = attn_param + ff_param
+    return total
+
+
+def estimate_flops_per_token(n_layer, n_embd, block_size):
+    """
+    Ref: https://arxiv.org/pdf/2001.08361.pdf
+    Assuming Llama architecture, MHA, attention dim == n_embd. FF intermediate size is calculated as (n_embd * 8 / 3) and rounded up to the multiple of 256.
+    """
+    total_param = calculate_non_embedding_param(n_layer, n_embd)
+    forward_flops_per_token = 2* total_param + 2 * block_size * n_layer * n_embd
+    total_flops_token = forward_flops_per_token * 3
+    return total_flops_token
+
+
 # learning rate decay scheduler (cosine with warmup)
 def get_lr(it, training_config):
     # 1) linear warmup for warmup_iters steps
