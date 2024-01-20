@@ -65,7 +65,7 @@ lightning run model \
     --accelerator=cuda \
     --devices=8 \
     --num-nodes=2 \
-    pretrain/tinyllama.py --devices 8 --train_data_dir data/slim_star  --val_data_dir data/slim_star
+    pretrain/tinyllama.py --training_config experiments/tinyllama_1b.yaml
 ```
 On node 2:
 ```
@@ -75,7 +75,7 @@ lightning run model \
     --accelerator=cuda \
     --devices=8 \
     --num-nodes=2 \
-    pretrain/tinyllama.py --devices 8 --train_data_dir data/slim_star   --val_data_dir data/slim_star
+    pretrain/tinyllama.py --training_config experiments/tinyllama_1b.yaml
 ```
 You can follow [these instructions](https://lightning.ai/docs/fabric/stable/guide/multi_node/slurm.html) if you have a slurm cluster.
 

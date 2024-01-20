@@ -55,11 +55,7 @@ def setup(
         # save training_config to out_dir
         with open(training_config.out_dir+ '/training_config.yaml', 'w') as file:
             yaml.dump(vars(training_config), file)
-            
-            
-    
 
-    
     handle_training_config(training_config)
 
     # fabric.launch(main, training_config)
@@ -189,10 +185,6 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, training_con
             lr = lr
         )
 
-
-            
-    
-            
         if val_dataloader is not None and not is_accumulating and state["step_count"] % training_config.eval_step_interval == 0:
             
             t0 = time.perf_counter()

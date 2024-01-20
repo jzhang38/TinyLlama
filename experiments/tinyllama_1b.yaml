@@ -39,6 +39,7 @@ train_data_config:
       train_star: 30
     end_step: 1430512
 
+  # add stage_2 if you want
   # - name: stage_2
   #   datasets:
   #     train_star:
