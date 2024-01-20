@@ -24,7 +24,7 @@ beta1: 0.9
 beta2: 0.95
 grad_clip: 1.0
 warmup_steps: 2000
-num_of_devices: 4
+num_of_devices: 8
 
 # Data
 train_data_dir:  data/tinyllama_pretrain_data
