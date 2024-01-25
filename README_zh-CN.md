@@ -3,7 +3,7 @@
 # TinyLlama-1.1B
 [English](README.md) | 中文
 
-[Chat Demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat)
+[Chat Demo](https://huggingface.co/spaces/TinyLlama/tinyllama-chat)
 </div>
 
 TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11亿参数的Llama模型。经过精心优化，我们"仅"需16块A100-40G的GPU，便可在90天内完成这个任务🚀🚀。训练已于2023-09-01开始。
@@ -16,8 +16,14 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 
 #### 新闻
 
+* 2023-12-18：
+  * 添加两个文档 [1](https://whimsical-aphid-86d.notion.site/Release-of-TinyLlama-1-5T-Checkpoints-Postponed-01b266998c1c47f78f5ae1520196d194?pvs=4), [2](https://whimsical-aphid-86d.notion.site/Latest-Updates-from-TinyLlama-Team-7d30c01fff794da28ccc952f327c8d4f?pvs=4) 说明训练曲线、项目时间表和错误修复的变化。
+* 2023-10-03: 
+  * 在speculative decoding中添加llama.cpp的代码示例。具体请查看 [speculative_decoding/README.md](speculative_decoding/README.md)。
+  * 2023-10-02: 1. 1T-token检查点刚发布。2. 我们在[huggingface](https://huggingface.co/TinyLlama/tinyLlama-intermediate-checkpoints/tree/step-480k-token-1007B)上记录了**所有**中间检查点。
+  * 2023-09-28: 启用[Discord](https://discord.gg/74Wcx4j5Nb)服务器。
 * 2023-09-18: 
-  * 发布了一个 [chat demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat)，欢迎点击链接来尝试我们的模型。
+  * 发布了一个 [chat demo](https://huggingface.co/spaces/TinyLlama/tinyllama-chat)，欢迎点击链接来尝试我们的模型。
 * 2023-09-16: 
   * 发布了目前已经训练了 5.03 亿个 token 的 [checkpoints 模型](https://huggingface.co/PY007/TinyLlama-1.1B-intermediate-step-240k-503b)。 
   * 基于 5.03 亿 token 的 [checkpoints 模型](https://huggingface.co/PY007/TinyLlama-1.1B-intermediate-step-240k-503b) 在 OpenAssistant 数据集上微调并开源了聊天模型 [TinyLlama-Chat-V0.1](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1) ，并添加了我们的 [微调脚本](sft) 。
@@ -29,6 +35,8 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 #### 发布时间表
 
 我们会根据以下计划逐步发布中间checkpoint。我们也列了一些基线模型进行比较。
+
+基座模型:
 
 | Date       | ModelScope 模型                                              | Tokens | Step | Commonsense Avg |
 | ---------- | ------------------------------------------------------------ | ------ | ---- | --------------- |
@@ -42,9 +50,13 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 | 2023-11-15 | --                                                           | 2.5T   | --   | --              |
 | 2023-12-01 | --                                                           | 3T     | --   | --              |
 
+对话模型:
 
+| Date       | ModelScope 模型                                   | Tokens | Step | Commonsense Avg |
+|------------|-------------------------------------------------|--------|------| --------------- |
+| 2023-09-16 | [TinyLlama-1.1B-Chat-V0.1](https://www.modelscope.cn/models/chaoscodes/TinyLlama-1.1B-Chat-v0.1/files) | 503B   | 240K | 49.57           |
 
-需要注意的是，由于我们的现在模型还处于训练初期，学习率并没有完全稳定下来，为了更好的体验我们的模型，您可以下载我们 [聊天模型](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1) 或者通过 [chat demo](https://huggingface.co/spaces/PY007/TinyLlama-Chat) 来尝试我们的模型。
+需要注意的是，由于我们的现在模型还处于训练初期，学习率并没有完全稳定下来，为了更好的体验我们的模型，您可以下载我们 [聊天模型](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) 或者通过 [chat demo](https://huggingface.co/spaces/TinyLlama/tinyllama-chat) 来尝试我们的模型。
 
 
 你们也可以在[这里](https://api.wandb.ai/links/lance777/pgvhrsny)实时跟踪TinyLlama的训练损失。
@@ -83,15 +95,14 @@ TinyLlama项目旨在在3万亿tokens上进行预训练，构建一个拥有11�
 
 ## 速度极快
 我们的代码库支持以下特性：
-- multi-gpu and multi-node distributed training with FSDP.
-- flash attention 2.
-- fused layernorm.
-- fused swiglu.
-- fused cross entropy loss .
-- fused rotary positional embedding.
+- 使用FSDP进行多GPU和多节点分布式训练
+- flash attention 2
+- 融合层归一化 (fused layernorm)
+- 融合swiglu (fused swiglu)
+- 融合交叉熵损失 (fused cross entropy loss)
+- 融合旋转位置嵌入 (fused rotary positional embedding)
 
-Credit: flash attention 2, fused layernorm, fused cross entropy loss, and fused
-rotary positional embedding are from the [FlashAttention repo](https://github.com/Dao-AILab/flash-attention/). Fused swiglu is from [xformers](https://github.com/facebookresearch/xformers).
+致谢：flash attention 2、融合层归一化、融合交叉熵损失和融合旋转位置嵌入来自于[FlashAttention](https://github.com/Dao-AILab/flash-attention/)仓库；融合swiglu来自于[xformers](https://github.com/facebookresearch/xformers)。
 
 有了这些优化, 我们可以达到**24k tokens/秒/A100**的训练速度，也就是56%的MFU（在A100-80G上的MFU会更高）。这个速度可以让你可以在**8个A100上用32小时训练一个chinchilla-optimial的模型**(11亿参数，220亿token)。这些优化也大大减少了显存占用, 我们可以把11亿参数的模型塞入40GB的GPU里面还能同时维持16k tokens的per-gpu batch size。只需要把batch size改小一点， 你就可以在**RTX 3090/4090**上面训练TinyLlama。
 下面是我们的代码库与Pythia和MPT的训练速度的比较。
@@ -113,12 +124,12 @@ TinyLlama是一个相对较小的模型, 同时我们用了GQA, 这意味着它�
 |[vLLM](https://github.com/vllm-project/vllm)       | A40 GPU  | batch_size=100, n=10 |   7094.5         |
 
 
-## 开始训练
+## 开始预训练
 请参考[PRETRAIN.md](PRETRAIN.md)。
 
 
 
-## Finetune
+## 微调
 
 * 我们在 [sft](sft) 中添加了我们进行微调和推理的代码。并且基于这个代码我们在[openassistant-guanaco](https://huggingface.co/datasets/timdettmers/openassistant-guanaco) 数据集上进行了微调，得到了我们的第一版[聊天模型](https://huggingface.co/PY007/TinyLlama-1.1B-Chat-v0.1)。
 * 如果您希望在 RAM 小于 4GB 的 GPU 上对用我们的模型进行微调，可以参考并使用 [Qlora](https://github.com/artidoro/qlora) 和 [bitsandbytes](https://github.com/TimDettmers/bitsandbytes) 项目。
@@ -164,12 +175,13 @@ TinyLlama是一个相对较小的模型, 同时我们用了GQA, 这意味着它�
 如果您觉得我们的工作有价值， 可以引用:
 
 ```
-@online{tinyllama,
-  author    = {Peiyuan Zhang, Guangtao Zeng, Tianduo Wang and Wei Lu},
-  title     = {TinyLlama},
-  url       = {https://github.com/jzhang38/TinyLlama},
-  year      = {2023},
-  month     = {Sep}
+@misc{zhang2024tinyllama,
+      title={TinyLlama: An Open-Source Small Language Model}, 
+      author={Peiyuan Zhang and Guangtao Zeng and Tianduo Wang and Wei Lu},
+      year={2024},
+      eprint={2401.02385},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
 }
 ```
 
