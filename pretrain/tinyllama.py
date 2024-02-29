@@ -195,7 +195,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
     curr_iter = 0
             
     loss_func = FusedCrossEntropyLoss()
-    for  train_data in train_dataloader:
+    for curr_iter, train_data in enumerate(train_dataloader, curr_iter):
         # resume loader state. This is not elegant but it works. Should rewrite it in the future.
         if resume:
             if curr_iter < initial_iter:
