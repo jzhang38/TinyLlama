@@ -12,7 +12,8 @@ wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
 import lit_gpt.packed_dataset as packed_dataset
-from lit_gpt import Config, Tokenizer
+from lit_gpt.config import Config
+from lit_gpt.tokenizer import Tokenizer
 
 filenames_sample = [
     "arxiv_sample.jsonl",

@@ -4,7 +4,7 @@ from typing import Any, Literal, Optional, Type
 import torch
 from typing_extensions import Self
 
-import lit_gpt.model
+import lit_gpt
 from lit_gpt.utils import find_multiple
 
 
