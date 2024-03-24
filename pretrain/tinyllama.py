@@ -24,21 +24,21 @@ from pytorch_lightning.loggers import WandbLogger
 from lit_gpt import FusedCrossEntropyLoss
 import random
 
-model_name = "tiny_LLaMA_120M"
-name = "tinyllama_120M"
-out_dir = Path("out") / name
+# model_name = "tiny_LLaMA_120M"
+# name = "tinyllama_120M"
+# out_dir = Path("out") / name
 
 # Hyperparameters
-num_of_devices = 1
-global_batch_size = 12
-learning_rate = 4e-4
-micro_batch_size = 12
-max_step = 715256 * 2
-warmup_steps = 2000
-log_step_interval = 10
-eval_iters = 100
-save_step_interval = 5000
-eval_step_interval = 5000
+# num_of_devices = 1
+# global_batch_size = 12
+# learning_rate = 4e-4
+# micro_batch_size = 12
+# max_step = 715256 * 2
+# warmup_steps = 2000
+# log_step_interval = 10
+# eval_iters = 100
+# save_step_interval = 5000
+# eval_step_interval = 5000
 
 # model_name = "tiny_LLaMA_300M"
 # name = "tinyllama_300M"
@@ -56,21 +56,21 @@ eval_step_interval = 5000
 # save_step_interval = 5000
 # eval_step_interval = 5000
 
-# model_name = "tiny_LLaMA_500M"
-# name = "tinyllama_500M"
-# out_dir = Path("out") / name
+model_name = "tiny_LLaMA_500M"
+name = "tinyllama_500M"
+out_dir = Path("out") / name
 
-# # Hyperparameters
-# num_of_devices = 1
-# global_batch_size = 4
-# learning_rate = 4e-4
-# micro_batch_size = 4
-# max_step = 715256 * 2
-# warmup_steps = 2000
-# log_step_interval = 10
-# eval_iters = 100
-# save_step_interval = 5000
-# eval_step_interval = 5000
+# Hyperparameters
+num_of_devices = 4
+global_batch_size = 32
+learning_rate = 4e-4
+micro_batch_size = 8
+max_step = 715256 * 2
+warmup_steps = 2000
+log_step_interval = 10
+eval_iters = 100
+save_step_interval = 5000
+eval_step_interval = 5000
 
 
 weight_decay = 1e-1
@@ -117,7 +117,7 @@ wandb_logger = WandbLogger(reinit=True)
 
 
 def setup(
-    devices: int = 1,
+    devices: int = num_of_devices,
     train_data_dir: Path = Path("data/redpajama_sample"),
     val_data_dir: Optional[Path] = None,
     precision: Optional[str] = None,

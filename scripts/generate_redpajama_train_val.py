@@ -3,7 +3,7 @@ import glob
 import random
 
 # Specify the folder to search in
-folder_path = '/media/ken/Data/red_pajama_1_t_sample_tiny_llama/'
+folder_path = '/root/data/red_pajama_1_t_sample_tiny_llama/'
 
 # Find all .bin files in the folder
 bin_files = glob.glob(os.path.join(folder_path, '*.bin'))
