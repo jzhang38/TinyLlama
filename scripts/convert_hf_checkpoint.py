@@ -54,6 +54,7 @@ def copy_weights_gpt_neox(
         else:
             to_name = weight_map[name]
         param = load_param(param, name, dtype)
+        print(param)
         if saver is not None:
             param = saver.store_early(param)
         state_dict[to_name] = param

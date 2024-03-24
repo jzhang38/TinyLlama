@@ -1,4 +1,4 @@
-from lit_gpt.model import GPT
+# from lit_gpt.model import GPT
 from lit_gpt.config import Config
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.fused_cross_entropy import FusedCrossEntropyLoss
@@ -17,4 +17,5 @@ if not bool(_LIGHTNING_AVAILABLE):
     )
 
 
-__all__ = ["GPT", "Config", "Tokenizer"]
+# __all__ = ["GPT", "Config", "Tokenizer"]
+__all__ = ["Config", "Tokenizer"]

@@ -1,3 +1,4 @@
+import tqdm
 import glob
 import math
 import sys
@@ -23,21 +24,53 @@ from pytorch_lightning.loggers import WandbLogger
 from lit_gpt import FusedCrossEntropyLoss
 import random
 
-model_name = "tiny_LLaMA_1b"
-name = "tinyllama_1b"
+model_name = "tiny_LLaMA_120M"
+name = "tinyllama_120M"
 out_dir = Path("out") / name
 
 # Hyperparameters
-num_of_devices = 8
-global_batch_size = 512
+num_of_devices = 1
+global_batch_size = 12
 learning_rate = 4e-4
-micro_batch_size = 8
+micro_batch_size = 12
 max_step = 715256 * 2
 warmup_steps = 2000
 log_step_interval = 10
 eval_iters = 100
 save_step_interval = 5000
 eval_step_interval = 5000
+
+# model_name = "tiny_LLaMA_300M"
+# name = "tinyllama_300M"
+# out_dir = Path("out") / name
+
+# # Hyperparameters
+# num_of_devices = 1
+# global_batch_size = 16
+# learning_rate = 4e-4
+# micro_batch_size = 16
+# max_step = 715256 * 2
+# warmup_steps = 2000
+# log_step_interval = 10
+# eval_iters = 100
+# save_step_interval = 5000
+# eval_step_interval = 5000
+
+# model_name = "tiny_LLaMA_500M"
+# name = "tinyllama_500M"
+# out_dir = Path("out") / name
+
+# # Hyperparameters
+# num_of_devices = 1
+# global_batch_size = 4
+# learning_rate = 4e-4
+# micro_batch_size = 4
+# max_step = 715256 * 2
+# warmup_steps = 2000
+# log_step_interval = 10
+# eval_iters = 100
+# save_step_interval = 5000
+# eval_step_interval = 5000
 
 
 weight_decay = 1e-1
@@ -61,9 +94,16 @@ log_iter_interval = log_step_interval * gradient_accumulation_steps
 
 
 # Treat all dataset equally by their size. If you want to use a different weight for a dataset, add it to the list with the weight.
+# train_data_config = [
+#     ("train_slim", 0.693584),
+#     ("train_starcoder", 0.306416),
+# ]
+# TODO: add train_slim once it is done
+# train_data_config = [
+#     ("train_starcoder", 1.0),
+# ]
 train_data_config = [
-    ("train_slim", 0.693584),
-    ("train_star", 0.306416),
+    ("train", 1.0),
 ]
 
 val_data_config = [
@@ -72,11 +112,12 @@ val_data_config = [
 
 hparams = {k: v for k, v in locals().items() if isinstance(v, (int, float, str)) and not k.startswith("_")}
 logger = step_csv_logger("out", name, flush_logs_every_n_steps=log_iter_interval)
-wandb_logger = WandbLogger()
+# https://github.com/wandb/wandb/issues/4929
+wandb_logger = WandbLogger(reinit=True)
 
 
 def setup(
-    devices: int = 8,
+    devices: int = 1,
     train_data_dir: Path = Path("data/redpajama_sample"),
     val_data_dir: Optional[Path] = None,
     precision: Optional[str] = None,
@@ -102,6 +143,7 @@ def setup(
         strategy = "auto"
 
     fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=[logger, wandb_logger])
+    # fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=[logger])
     fabric.print(hparams)
     #fabric.launch(main, train_data_dir, val_data_dir, resume)
     main(fabric, train_data_dir, val_data_dir, resume)
@@ -195,7 +237,7 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
     curr_iter = 0
             
     loss_func = FusedCrossEntropyLoss()
-    for  train_data in train_dataloader:
+    for train_data in train_dataloader:
         # resume loader state. This is not elegant but it works. Should rewrite it in the future.
         if resume:
             if curr_iter < initial_iter:
@@ -236,13 +278,14 @@ def train(fabric, state, train_dataloader, val_dataloader, monitor, resume):
         # input_id: B L 
         total_lengths += input_ids.size(1)
         t1 = time.perf_counter()
-        fabric.print(
-                f"iter {state['iter_num']} step {state['step_count']}: loss {loss.item():.4f}, iter time:"
-                f" {(t1 - iter_t0) * 1000:.2f}ms{' (optimizer.step)' if not is_accumulating else ''}"
-                f" remaining time: {(t1 - total_t0) / (state['iter_num'] - initial_iter) * (max_iters - state['iter_num']) / 3600:.2f} hours. " 
-                # print days as well
-                f" or {(t1 - total_t0) / (state['iter_num'] - initial_iter) * (max_iters - state['iter_num']) / 3600 / 24:.2f} days. "
-            )
+        if state["iter_num"] == 1 or state["iter_num"] % 100 == 0:
+            fabric.print(
+                    f"iter {state['iter_num']} step {state['step_count']}: loss {loss.item():.4f}, iter time:"
+                    f" {(t1 - iter_t0) * 1000:.2f}ms{' (optimizer.step)' if not is_accumulating else ''}"
+                    f" remaining time: {(t1 - total_t0) / (state['iter_num'] - initial_iter) * (max_iters - state['iter_num']) / 3600:.2f} hours. " 
+                    # print days as well
+                    f" or {(t1 - total_t0) / (state['iter_num'] - initial_iter) * (max_iters - state['iter_num']) / 3600 / 24:.2f} days. "
+                )
  
         monitor.on_train_batch_end(
             state["iter_num"] * micro_batch_size,
@@ -313,7 +356,7 @@ def create_dataloader(
             # n_chunks control the buffer size. 
             # Note that the buffer size also impacts the random shuffle
             # (PackedDataset is an IterableDataset. So the shuffle is done by prefetch a buffer and shuffle the buffer)
-            n_chunks=8,
+            n_chunks=num_of_devices,
             block_size=block_size,
             shuffle=shuffle,
             seed=seed+fabric.global_rank,

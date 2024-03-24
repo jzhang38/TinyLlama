@@ -10,15 +10,15 @@ wandb
 zstd
 
 # for finetuning
-bitsandbytes==0.40.0
-transformers==4.31.0
-peft==0.4.0
-accelerate==0.21.0
-einops==0.6.1
-evaluate==0.4.0
-scikit-learn==1.2.2
-sentencepiece==0.1.99
-wandb==0.15.3
+#bitsandbytes==0.40.0
+#transformers==4.31.0
+#peft==0.4.0
+#accelerate==0.21.0
+#einops==0.6.1
+#evaluate==0.4.0
+#scikit-learn==1.2.2
+#sentencepiece==0.1.99
+#wandb==0.15.3
 # other optional dependencies are
 # sentencepiece  # pythia, falcon, redpajama
 # tokenizers  #  llama-based models

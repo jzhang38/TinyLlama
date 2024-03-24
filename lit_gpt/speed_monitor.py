@@ -9,7 +9,8 @@ from lightning.fabric.utilities.rank_zero import rank_zero_only as fabric_rank_z
 from lightning.pytorch.utilities.rank_zero import rank_zero_only as trainer_rank_zero_only
 from torch.utils.flop_counter import FlopCounterMode
 import math
-from lit_gpt import GPT, Config
+from lit_gpt.model import GPT
+from lit_gpt.config import Config
 from lit_gpt.utils import num_parameters
 
 GPU_AVAILABLE_FLOPS = {
