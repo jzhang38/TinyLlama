@@ -82,7 +82,7 @@ def prepare(
     if filenames_subset:
         filenames = [f for f in filenames if any([prefix in f for prefix in filenames_subset])]
     filenames = filenames[:int(len(filenames) * percentage)]
-    num_processes = 64
+    num_processes = cpu_count()
     chunked_filenames = np.array_split(filenames, num_processes)
 
     processes = []

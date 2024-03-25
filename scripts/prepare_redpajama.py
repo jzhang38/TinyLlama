@@ -1,8 +1,11 @@
 import glob
 import json
+from multiprocessing import Process, cpu_count
 import os
 import sys
 from pathlib import Path
+import time
+from typing import List
 
 import numpy as np
 from tqdm import tqdm
@@ -12,7 +15,8 @@ wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
 import lit_gpt.packed_dataset as packed_dataset
-from lit_gpt import Config, Tokenizer
+from lit_gpt.config import Config
+from lit_gpt.tokenizer import Tokenizer
 
 filenames_sample = [
     "arxiv_sample.jsonl",
@@ -40,14 +44,21 @@ filename_sets = {
 
 
 def prepare_sample(
-    source_path: Path, checkpoint_dir: Path, destination_path: Path, chunk_size: int, match: str = ""
+    source_path: Path,
+    checkpoint_dir: Path,
+    destination_path: Path,
+    chunk_size: int,
+    match: str = "",
+    split: str="train",
+    filenames_subset: List[str] = None,
+    process_id: int = 0
 ) -> None:
     """Prepare the "Red Pajama" dataset using the original tokenizer."""
     destination_path.mkdir(parents=True, exist_ok=True)
 
     tokenizer = Tokenizer(checkpoint_dir)
 
-    for name in filenames_sample:
+    for name in filenames_subset:
         if match and match not in name:
             continue
 
@@ -61,11 +72,11 @@ def prepare_sample(
                 " \nhttps://huggingface.co/datasets/togethercomputer/RedPajama-Data-1T-Sample \n"
             )
 
-        prefix, _ = os.path.splitext(name)
+        data_file_name, _ = os.path.splitext(name)
 
         builder = packed_dataset.PackedDatasetBuilder(
             outdir=destination_path,
-            prefix=prefix,
+            prefix=f"{split}_redpajamav1_{data_file_name}_{process_id}",  # Use process_id to differentiate builders
             chunk_size=chunk_size,
             sep_token=tokenizer.eos_id,
             dtype="auto",
@@ -80,7 +91,8 @@ def prepare_sample(
                 text_ids = tokenizer.encode(text)
                 builder.add_array(np.array(text_ids, dtype=builder.dtype))
 
-        builder.write_reminder()
+        # we throw away the final corpus to avoid meaningless corpus filled with bos_ids, see https://github.com/jzhang38/TinyLlama/issues/83 for more details
+        # builder.write_reminder()
 
 
 def prepare_full(
@@ -144,20 +156,39 @@ def prepare(
     checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
     destination_path: Path = Path("data/redpajama_sample"),
     sample: bool = True,
+    chunk_size: int = 2049 * 1024, # block size + 1 for causal, 1024 blocks
+    split: str="train",
     match: str = "",
 ) -> None:
-    """Prepare the "Red Pajama" dataset. We assume tokenizer has been trained."""
-    with open(checkpoint_dir / "lit_config.json") as fp:
-        config = Config(**json.load(fp))
+    # """Prepare the "Red Pajama" dataset. We assume tokenizer has been trained."""
+    # with open(checkpoint_dir / "lit_config.json") as fp:
+    #     config = Config(**json.load(fp))
 
-    prepare_fn = prepare_sample if sample else prepare_full
-    prepare_fn(
-        source_path=source_path,
-        checkpoint_dir=checkpoint_dir,
-        destination_path=destination_path,
-        chunk_size=(config.block_size + 1) * 1024,  # block size + 1 for causal, 1024 blocks
-        match=match,
-    )
+    # prepare_fn = prepare_sample if sample else prepare_full
+    # prepare_fn(
+    #     source_path=source_path,
+    #     checkpoint_dir=checkpoint_dir,
+    #     destination_path=destination_path,
+    #     # chunk_size=(config.block_size + 1) * 1024,  # block size + 1 for causal, 1024 blocks
+    #     chunk_size=(2048 + 1) * 1024,  # block size + 1 for causal, 1024 blocks
+    #     match=match,
+    # )
+    filenames = filenames_sample if sample else filename_sets
+    num_processes = cpu_count()
+    chunked_filenames = np.array_split(filenames, num_processes)
+
+    processes = []
+    start_time = time.time()
+    for i, subset in enumerate(chunked_filenames):
+        p = Process(target=prepare_sample, args=(source_path, checkpoint_dir, destination_path, chunk_size, match, split, list(subset), i))
+        processes.append(p)
+        p.start()
+
+    for p in processes:
+        p.join()
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Time taken: {elapsed_time:.2f} seconds")
 
 
 if __name__ == "__main__":

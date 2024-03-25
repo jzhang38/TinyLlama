@@ -15,3 +15,6 @@ wandb
 tests/original_falcon_40b.py
 sft/output
 sft/wandb
+
+llama-tokenizer/
+flash-attention/

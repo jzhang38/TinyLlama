@@ -4,7 +4,7 @@ from typing import Any, Literal, Optional, Type
 import torch
 from typing_extensions import Self
 
-import lit_gpt.model
+import lit_gpt
 from lit_gpt.utils import find_multiple
 
 
@@ -299,6 +299,42 @@ tiny_LLaMA = [
         intermediate_size=5632,
         n_query_groups=4,
         condense_ratio= 4
+    ),
+    dict(
+        org="keeeeenw",
+        name="tiny_LLaMA_300M",
+        block_size=2048,
+        vocab_size=32000,
+        padding_multiple=64,
+        n_layer=12,
+        n_head=16,
+        n_embd=1024,
+        rotary_percentage=1.0,
+        parallel_residual=False,
+        bias=False,
+        _norm_class="FusedRMSNorm",
+        norm_eps=1e-5, #Llama 2 use 1e-5. Llama 1 use 1e-6
+        _mlp_class="LLaMAMLP",
+        intermediate_size=5632,
+        n_query_groups=4,
+    ),
+    dict(
+        org="keeeeenw",
+        name="tiny_LLaMA_500M",
+        block_size=2048,
+        vocab_size=32000,
+        padding_multiple=64,
+        n_layer=11,
+        n_head=32,
+        n_embd=2048,
+        rotary_percentage=1.0,
+        parallel_residual=False,
+        bias=False,
+        _norm_class="FusedRMSNorm",
+        norm_eps=1e-5, #Llama 2 use 1e-5. Llama 1 use 1e-6
+        _mlp_class="LLaMAMLP",
+        intermediate_size=5632,
+        n_query_groups=4,
     ),
 ]
 configs.extend(tiny_LLaMA)
