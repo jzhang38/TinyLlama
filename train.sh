@@ -10,11 +10,11 @@
 wandb login
 
 # For validation
-DATASET=/root/data/red_pajama_1_t_sample_tiny_llama
+DATASET=/root/data/slim_star_combined
 DEVICES=4
 lightning run model \
     --node-rank=0  \
     --accelerator=cuda \
     --devices=$DEVICES \
     --num-nodes=1 \
-    pretrain/tinyllama.py --devices $DEVICES --train_data_dir $DATASET  --val_data_dir $DATASET
+    pretrain/tinyllama.py --devices $DEVICES --train_data_dir $DATASET  --val_data_dir /root/data/red_pajama_1_t_sample_tiny_llama

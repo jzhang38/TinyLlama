@@ -28,25 +28,9 @@ import random
 # name = "tinyllama_120M"
 # out_dir = Path("out") / name
 
-# Hyperparameters
-# num_of_devices = 1
-# global_batch_size = 12
-# learning_rate = 4e-4
-# micro_batch_size = 12
-# max_step = 715256 * 2
-# warmup_steps = 2000
-# log_step_interval = 10
-# eval_iters = 100
-# save_step_interval = 5000
-# eval_step_interval = 5000
-
-# model_name = "tiny_LLaMA_300M"
-# name = "tinyllama_300M"
-# out_dir = Path("out") / name
-
 # # Hyperparameters
-# num_of_devices = 1
-# global_batch_size = 16
+# num_of_devices = 4
+# global_batch_size = 64
 # learning_rate = 4e-4
 # micro_batch_size = 16
 # max_step = 715256 * 2
@@ -56,21 +40,37 @@ import random
 # save_step_interval = 5000
 # eval_step_interval = 5000
 
-model_name = "tiny_LLaMA_500M"
-name = "tinyllama_500M"
+model_name = "tiny_LLaMA_300M"
+name = "tinyllama_300M"
 out_dir = Path("out") / name
 
 # Hyperparameters
 num_of_devices = 4
-global_batch_size = 32
+global_batch_size = 48
 learning_rate = 4e-4
-micro_batch_size = 8
+micro_batch_size = 12
 max_step = 715256 * 2
 warmup_steps = 2000
 log_step_interval = 10
 eval_iters = 100
 save_step_interval = 5000
 eval_step_interval = 5000
+
+# model_name = "tiny_LLaMA_500M"
+# name = "tinyllama_500M"
+# out_dir = Path("out") / name
+
+# # Hyperparameters
+# num_of_devices = 4
+# global_batch_size = 32
+# learning_rate = 4e-4
+# micro_batch_size = 8
+# max_step = 715256 * 2
+# warmup_steps = 2000
+# log_step_interval = 10
+# eval_iters = 100
+# save_step_interval = 5000
+# eval_step_interval = 5000
 
 
 weight_decay = 1e-1
