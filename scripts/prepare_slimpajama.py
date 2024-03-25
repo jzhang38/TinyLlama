@@ -59,10 +59,9 @@ def prepare_full(
         vocab_size=tokenizer.vocab_size,
     )
 
-    for filepath in filenames:
-        print(f"Processing {filepath}")
+    for filepath in tqdm(filenames):
         with zstd.open(open(filepath, "rb"), "rt", encoding="utf-8") as f:
-            for row in tqdm(f):
+            for row in f:
                 text = json.loads(row)["text"]
                 if json.loads(row)["meta"]["redpajama_set_name"] == "RedPajamaGithub":
                     continue # we don't want to include the github data
@@ -110,7 +109,8 @@ def download_files(
         processes.append(p)
         p.start()
 
-    for p in processes:
+    # Monitor completed tasks
+    for p in tqdm(processes):
         p.join()
     end_time = time.time()
     elapsed_time = end_time - start_time

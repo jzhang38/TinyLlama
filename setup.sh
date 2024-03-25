@@ -1,4 +1,5 @@
 pip install torch==2.1.0 xformers --index-url https://download.pytorch.org/whl/cu121
+pip install packaging
 pip uninstall ninja -y && pip install ninja -U
 git clone https://github.com/Dao-AILab/flash-attention
 cd flash-attention
@@ -6,7 +7,7 @@ python setup.py install
 cd csrc/rotary && pip install .
 cd ../layer_norm && pip install .
 cd ../xentropy && pip install .
-cd ../.. && rm -rf flash-attention
+cd ../..
 cd ../..
 pip install -r requirements.txt tokenizers sentencepiece
 
